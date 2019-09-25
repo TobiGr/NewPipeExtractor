@@ -3,7 +3,6 @@ package org.schabi.newpipe.extractor.services.youtube.extractors;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
-import com.grack.nanojson.JsonParserException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,7 +10,10 @@ import org.jsoup.select.Elements;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptableObject;
-import org.schabi.newpipe.extractor.*;
+import org.schabi.newpipe.extractor.Downloader;
+import org.schabi.newpipe.extractor.MediaFormat;
+import org.schabi.newpipe.extractor.NewPipe;
+import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.exceptions.ContentNotAvailableException;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
@@ -110,11 +112,11 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             try {
                 name = doc.select("meta[name=title]").attr(CONTENT);
             } catch (Exception e) {
-                throw new ParsingException("Could not get the title", e);
+                throw new ParsingException("Could not get the title", e, doc);
             }
         }
         if(name == null || name.isEmpty()) {
-            throw new ParsingException("Could not get the title");
+            throw new ParsingException("Could not get the title", doc);
         }
         return name;
     }
@@ -126,7 +128,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return doc.select("meta[itemprop=datePublished]").attr(CONTENT);
         } catch (Exception e) {//todo: add fallback method
-            throw new ParsingException("Could not get upload date", e);
+            throw new ParsingException("Could not get upload date", e, doc);
         }
     }
 
@@ -150,7 +152,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return videoInfoPage.get("thumbnail_url");
         } catch (Exception e) {
-            throw new ParsingException("Could not get thumbnail url", e);
+            throw new ParsingException("Could not get thumbnail url", e, doc);
         }
     }
 
@@ -161,7 +163,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return parseHtmlAndGetFullLinks(doc.select("p[id=\"eow-description\"]").first().html());
         } catch (Exception e) {
-            throw new ParsingException("Could not get the description", e);
+            throw new ParsingException("Could not get the description", e, doc);
         }
     }
 
