@@ -23,6 +23,8 @@ package org.schabi.newpipe.extractor.exceptions;
 
 import org.jsoup.nodes.Document;
 
+import javax.print.Doc;
+
 public class ParsingException extends ExtractionException {
 
     private String document;
@@ -35,9 +37,17 @@ public class ParsingException extends ExtractionException {
         super(message, cause);
     }
 
+    public ParsingException(String message, Document document) {
+        this(message, document.toString());
+    }
+
     public ParsingException(String message, String document) {
         super(message);
         this.document = document;
+    }
+
+    public ParsingException(String message, Throwable cause, Document document) {
+        this(message, cause, document.toString());
     }
 
     public ParsingException(String message, Throwable cause, String document) {

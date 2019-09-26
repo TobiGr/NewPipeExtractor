@@ -121,7 +121,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                             }
                             return link;
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get Uploader name", doc);
+                            throw new ParsingException("Could not get Uploader name", doc.toString());
                         }
                     }
 
@@ -137,7 +137,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                         try {
                             return getUploaderLink().text();
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get Uploader name", doc);
+                            throw new ParsingException("Could not get Uploader name", doc.toString());
                         }
                     }
 

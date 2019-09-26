@@ -30,6 +30,10 @@ public class ExtractionException extends Exception {
         super(message);
     }
 
+    public ExtractionException(String message, Document document) {
+        this(message, document.toString());
+    }
+
     public ExtractionException(String message, String document) {
         super(message);
         this.document = document;
