@@ -56,8 +56,13 @@ public class YoutubeChannelInfoItemExtractor implements ChannelInfoItemExtractor
 
     @Override
     public String getUrl() throws ParsingException {
-        String buttonTrackingUrl = el.select("button[class*=\"yt-uix-button\"]").first()
-                .attr("abs:data-href");
+        String buttonTrackingUrl;
+        try {
+            buttonTrackingUrl = el.select("button[class*=\"yt-uix-button\"]").first().attr("abs:data-href");
+        } catch (Throwable e) {
+            throw new ParsingException("Could not get URL", e, el.toString());
+        }
+
 
         Pattern channelIdPattern = Pattern.compile("(?:.*?)\\%252Fchannel\\%252F([A-Za-z0-9\\-\\_]+)(?:.*)");
         Matcher match = channelIdPattern.matcher(buttonTrackingUrl);
