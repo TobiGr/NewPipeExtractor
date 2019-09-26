@@ -24,13 +24,13 @@ import org.jsoup.nodes.Document;
 
 public class ExtractionException extends Exception {
 
-    private Document document;
+    private String document;
 
     public ExtractionException(String message) {
         super(message);
     }
 
-    public ExtractionException(String message, Document document) {
+    public ExtractionException(String message, String document) {
         super(message);
         this.document = document;
     }
@@ -39,7 +39,7 @@ public class ExtractionException extends Exception {
         super(cause);
     }
 
-    public ExtractionException(Throwable cause, Document document) {
+    public ExtractionException(Throwable cause, String document) {
         super(cause);
         this.document = document;
     }
@@ -47,12 +47,12 @@ public class ExtractionException extends Exception {
         super(message, cause);
     }
 
-    public ExtractionException(String message, Throwable cause, Document document) {
+    public ExtractionException(String message, Throwable cause, String document) {
         super(message, cause);
         this.document = document;
     }
 
-    public Document getDocument() {
+    public String getDocument() {
         return document;
     }
 

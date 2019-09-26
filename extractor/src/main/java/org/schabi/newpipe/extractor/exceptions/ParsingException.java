@@ -25,7 +25,7 @@ import org.jsoup.nodes.Document;
 
 public class ParsingException extends ExtractionException {
 
-    private Document document;
+    private String document;
 
     public ParsingException(String message) {
         super(message);
@@ -35,17 +35,17 @@ public class ParsingException extends ExtractionException {
         super(message, cause);
     }
 
-    public ParsingException(String message, Document document) {
+    public ParsingException(String message, String document) {
         super(message);
         this.document = document;
     }
 
-    public ParsingException(String message, Throwable cause, Document document) {
+    public ParsingException(String message, Throwable cause, String document) {
         super(message, cause);
         this.document = document;
     }
 
-    public Document getDocument() {
+    public String getDocument() {
         return document;
     }
 }

@@ -107,11 +107,13 @@ public class YoutubeSearchExtractor extends SearchExtractor {
                 "&page=" + Integer.toString(pageNr + 1));
     }
 
-    private InfoItemsSearchCollector collectItems(Document doc) throws NothingFoundException  {
+    private InfoItemsSearchCollector collectItems(Document doc) throws NothingFoundException, ParsingException  {
         InfoItemsSearchCollector collector = getInfoItemSearchCollector();
 
         Element list = doc.select("ol[class=\"item-section\"]").first();
-
+        if (list == null) {
+            throw new ParsingException("Could not get search result items", doc.toString());
+        }
         for (Element item : list.children()) {
             /* First we need to determine which kind of item we are working with.
                Youtube depicts five different kinds of items on its search result page. These are
