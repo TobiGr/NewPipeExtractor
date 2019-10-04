@@ -140,8 +140,8 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
 
     @Override
     public long getSubscriberCount() throws ParsingException {
-
-        final Element el = doc.select("span[class*=\"yt-subscription-button-subscriber-count\"]").first();
+        throw new ParsingException("TEST EXCEPTION, just for demonstration purposes", doc);
+        /*final Element el = doc.select("span[class*=\"yt-subscription-button-subscriber-count\"]").first();
         if (el != null) {
             String elTitle = el.attr("title");
             try {
@@ -152,7 +152,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
         } else {
             // If the element is null, the channel have the subscriber count disabled
             return -1;
-        }
+        }*/
     }
 
     @Override
