@@ -65,7 +65,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             Element dl = el.select("h3").first().select("a").first();
             return dl.attr("abs:href");
         } catch (Exception e) {
-            throw new ParsingException("Could not get web page url for the video", e);
+            throw new ParsingException("Could not get web page url for the video", e, item.toString());
         }
     }
 
@@ -76,7 +76,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             Element dl = el.select("h3").first().select("a").first();
             return dl.text();
         } catch (Exception e) {
-            throw new ParsingException("Could not get title", e);
+            throw new ParsingException("Could not get title", e, item.toString());
         }
     }
 
@@ -90,7 +90,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             // see: https://www.youtube.com/results?sp=EgIQAVAU&q=asdfgf
             return duration == null ? 0 : YoutubeParsingHelper.parseDurationString(duration.text());
         } catch (Exception e) {
-            throw new ParsingException("Could not get Duration: " + getUrl(), e);
+            throw new ParsingException("Could not get Duration: " + getUrl(), e, item.toString());
         }
     }
 
@@ -101,7 +101,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
                     .select("a").first()
                     .text();
         } catch (Exception e) {
-            throw new ParsingException("Could not get uploader", e);
+            throw new ParsingException("Could not get uploader", e, item.toString());
         }
     }
 
@@ -120,8 +120,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             return item.select("span[class=\"title\"")
                     .text().split(" - ")[0];
         } catch (Exception e) {
-            System.out.println(item.html());
-            throw new ParsingException("Could not get uploader url", e);
+            throw new ParsingException("Could not get uploader url", e, item.toString());
         }
     }
 
@@ -136,7 +135,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
 
             return meta.select("li").first().text();
         } catch (Exception e) {
-            throw new ParsingException("Could not get upload date", e);
+            throw new ParsingException("Could not get upload date", e, item.toString());
         }
     }
 
@@ -157,7 +156,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             input = meta.select("li").get(1).text();
 
         } catch (IndexOutOfBoundsException e) {
-            throw new ParsingException("Could not parse yt-lockup-meta although available: " + getUrl(), e);
+            throw new ParsingException("Could not parse yt-lockup-meta although available: " + getUrl(), e, item.toString());
         }
 
         try {
@@ -168,7 +167,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
                 return 0;
             }
 
-            throw new ParsingException("Could not handle input: " + input, e);
+            throw new ParsingException("Could not handle input: " + input, e, item.toString());
         }
     }
 
@@ -187,7 +186,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             }
             return url;
         } catch (Exception e) {
-            throw new ParsingException("Could not get thumbnail url", e);
+            throw new ParsingException("Could not get thumbnail url", e, item.toString());
         }
     }
 

@@ -50,7 +50,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
         try {
             return doc.select("div[id=pl-header] h1[class=pl-header-title]").first().text();
         } catch (Exception e) {
-            throw new ParsingException("Could not get playlist name", e);
+            throw new ParsingException("Could not get playlist name", e, doc);
         }
     }
 
@@ -59,7 +59,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
         try {
             return doc.select("div[id=pl-header] div[class=pl-header-thumb] img").first().attr("abs:src");
         } catch (Exception e) {
-            throw new ParsingException("Could not get playlist thumbnail", e);
+            throw new ParsingException("Could not get playlist thumbnail", e, doc);
         }
     }
 
@@ -76,7 +76,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
                     doc.select("button[class*=\"yt-uix-subscription-button\"]")
                             .first().attr("data-channel-external-id");
         } catch (Exception e) {
-            throw new ParsingException("Could not get playlist uploader url", e);
+            throw new ParsingException("Could not get playlist uploader url", e, doc);
         }
     }
 
@@ -85,7 +85,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
         try {
             return doc.select("span[class=\"qualified-channel-title-text\"]").first().select("a").first().text();
         } catch (Exception e) {
-            throw new ParsingException("Could not get playlist uploader name", e);
+            throw new ParsingException("Could not get playlist uploader name", e, doc);
         }
     }
 
@@ -94,7 +94,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
         try {
             return doc.select("div[id=gh-banner] img[class=channel-header-profile-image]").first().attr("abs:src");
         } catch (Exception e) {
-            throw new ParsingException("Could not get playlist uploader avatar", e);
+            throw new ParsingException("Could not get playlist uploader avatar", e, doc);
         }
     }
 
@@ -105,7 +105,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
         try {
             input = doc.select("ul[class=\"pl-header-details\"] li").get(1).text();
         } catch (IndexOutOfBoundsException e) {
-            throw new ParsingException("Could not get video count from playlist", e);
+            throw new ParsingException("Could not get video count from playlist", e, doc);
         }
 
         try {
@@ -116,7 +116,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
             if (!input.isEmpty()) {
                 return 0;
             } else {
-                throw new ParsingException("Could not handle input: " + input, e);
+                throw new ParsingException("Could not handle input: " + input, e, input);
             }
         }
     }
@@ -137,11 +137,12 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
         }
 
         StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
+        String downloadedPage = getDownloader().download(pageUrl);
         JsonObject pageJson;
         try {
-            pageJson = JsonParser.object().from(getDownloader().download(pageUrl));
+            pageJson = JsonParser.object().from(downloadedPage);
         } catch (JsonParserException pe) {
-            throw new ParsingException("Could not parse ajax json", pe);
+            throw new ParsingException("Could not parse ajax json", pe, downloadedPage);
         }
 
         final Document pageHtml = Jsoup.parse("<table><tbody id=\"pl-load-more-destination\">"
@@ -173,7 +174,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
                 return "";
             }
         } catch (Exception e) {
-            throw new ParsingException("could not get next streams' url", e);
+            throw new ParsingException("could not get next streams' url", e, d);
         }
     }
 
@@ -203,7 +204,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
                     try {
                         return streamLinkHandlerFactory.fromId(li.attr("data-video-id")).getUrl();
                     } catch (Exception e) {
-                        throw new ParsingException("Could not get web page url for the video", e);
+                        throw new ParsingException("Could not get web page url for the video", e, li.toString());
                     }
                 }
 
@@ -212,7 +213,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
                     try {
                         return li.attr("data-title");
                     } catch (Exception e) {
-                        throw new ParsingException("Could not get title", e);
+                        throw new ParsingException("Could not get title", e, li.toString());
                     }
                 }
 
@@ -230,7 +231,7 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
 
                         return YoutubeParsingHelper.parseDurationString(first.text());
                     } catch (Exception e) {
-                        throw new ParsingException("Could not get duration" + getUrl(), e);
+                        throw new ParsingException("Could not get duration" + getUrl(), e, li.toString());
                     }
                 }
 

@@ -86,7 +86,7 @@ public class YoutubeCommentsInfoItemExtractor implements CommentsInfoItemExtract
             JsonArray arr = JsonUtils.getArray(json, "authorThumbnail.thumbnails");
             return JsonUtils.getString(arr.getObject(2), "url");
         } catch (Exception e) {
-            throw new ParsingException("Could not get author thumbnail", e);
+            throw new ParsingException("Could not get author thumbnail", e, json.toString());
         }
     }
 

@@ -74,7 +74,7 @@ public class YoutubeChannelInfoItemExtractor implements ChannelInfoItemExtractor
             return el.select("a[class*=\"yt-uix-tile-link\"]").first()
                     .attr("abs:href");
         } catch (Exception e) {
-            throw new ParsingException("Could not get channel url", e);
+            throw new ParsingException("Could not get channel url", e, el.toString());
         }
     }
 
@@ -85,7 +85,7 @@ public class YoutubeChannelInfoItemExtractor implements ChannelInfoItemExtractor
             try {
                 return Long.parseLong(Utils.removeNonDigitCharacters(subsEl.text()));
             } catch (NumberFormatException e) {
-                throw new ParsingException("Could not get subscriber count", e);
+                throw new ParsingException("Could not get subscriber count", e, el.toString());
             }
         } else {
             // If the element is null, the channel have the subscriber count disabled

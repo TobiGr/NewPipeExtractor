@@ -20,16 +20,44 @@ package org.schabi.newpipe.extractor.exceptions;
  * along with NewPipe.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class ExtractionException extends Exception {
+import org.jsoup.nodes.Document;
+
+public class ExtractionException extends Exception implements ParsedDocumentInfo {
+
+    private String document;
+
     public ExtractionException(String message) {
         super(message);
+    }
+
+    public ExtractionException(String message, Document document) {
+        this(message, document.toString());
+    }
+
+    public ExtractionException(String message, String document) {
+        super(message);
+        this.document = document;
     }
 
     public ExtractionException(Throwable cause) {
         super(cause);
     }
 
+    public ExtractionException(Throwable cause, String document) {
+        super(cause);
+        this.document = document;
+    }
     public ExtractionException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public ExtractionException(String message, Throwable cause, String document) {
+        super(message, cause);
+        this.document = document;
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
 }

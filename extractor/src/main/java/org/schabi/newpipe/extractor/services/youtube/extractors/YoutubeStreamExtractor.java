@@ -3,7 +3,6 @@ package org.schabi.newpipe.extractor.services.youtube.extractors;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
-import com.grack.nanojson.JsonParserException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,7 +10,10 @@ import org.jsoup.select.Elements;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptableObject;
-import org.schabi.newpipe.extractor.*;
+import org.schabi.newpipe.extractor.Downloader;
+import org.schabi.newpipe.extractor.MediaFormat;
+import org.schabi.newpipe.extractor.NewPipe;
+import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.exceptions.ContentNotAvailableException;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
@@ -99,16 +101,16 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     public String getName() throws ParsingException {
         assertPageFetched();
         String name = getStringFromMetaData("title");
-        if(name == null) {
+        if (name == null) {
             // Fallback to HTML method
             try {
                 name = doc.select("meta[name=title]").attr(CONTENT);
             } catch (Exception e) {
-                throw new ParsingException("Could not get the title", e);
+                throw new ParsingException("Could not get the title", e, doc);
             }
         }
-        if(name == null || name.isEmpty()) {
-            throw new ParsingException("Could not get the title");
+        if (name == null || name.isEmpty()) {
+            throw new ParsingException("Could not get the title", doc);
         }
         return name;
     }
@@ -120,7 +122,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return doc.select("meta[itemprop=datePublished]").attr(CONTENT);
         } catch (Exception e) {//todo: add fallback method
-            throw new ParsingException("Could not get upload date", e);
+            throw new ParsingException("Could not get upload date", e, doc);
         }
     }
 
@@ -144,7 +146,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return videoInfoPage.get("thumbnail_url");
         } catch (Exception e) {
-            throw new ParsingException("Could not get thumbnail url", e);
+            throw new ParsingException("Could not get thumbnail url", e, doc);
         }
     }
 
@@ -155,7 +157,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return parseHtmlAndGetFullLinks(doc.select("p[id=\"eow-description\"]").first().html());
         } catch (Exception e) {
-            throw new ParsingException("Could not get the description", e);
+            throw new ParsingException("Could not get the description", e, doc);
         }
     }
 
@@ -240,7 +242,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             return Integer.valueOf(doc.select("meta[property=\"og:restrictions:age\"]")
                     .attr(CONTENT).replace("+", ""));
         } catch (Exception e) {
-            throw new ParsingException("Could not get age restriction");
+            throw new ParsingException("Could not get age restriction", doc);
         }
     }
 
@@ -266,7 +268,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                     .getString("lengthSeconds");
             return Long.parseLong(duration);
         } catch (Exception e) {
-            throw new ParsingException("Every methode to get the duration has failed: ", e);
+            throw new ParsingException("Every methode to get the duration has failed: ", e, playerResponse.toString());
         }
     }
 
@@ -286,7 +288,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             return Long.parseLong(doc.select("meta[itemprop=interactionCount]").attr(CONTENT));
         } catch (Exception e) {//todo: find fallback method
-            throw new ParsingException("Could not get number of views", e);
+            throw new ParsingException("Could not get number of views", e, doc);
         }
     }
 
@@ -304,9 +306,9 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             }
             return Integer.parseInt(Utils.removeNonDigitCharacters(likesString));
         } catch (NumberFormatException nfe) {
-            throw new ParsingException("Could not parse \"" + likesString + "\" as an Integer", nfe);
+            throw new ParsingException("Could not parse \"" + likesString + "\" as an Integer", nfe, doc);
         } catch (Exception e) {
-            throw new ParsingException("Could not get like count", e);
+            throw new ParsingException("Could not get like count", e, doc);
         }
     }
 
@@ -324,9 +326,9 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             }
             return Integer.parseInt(Utils.removeNonDigitCharacters(dislikesString));
         } catch (NumberFormatException nfe) {
-            throw new ParsingException("Could not parse \"" + dislikesString + "\" as an Integer", nfe);
+            throw new ParsingException("Could not parse \"" + dislikesString + "\" as an Integer", nfe, doc);
         } catch (Exception e) {
-            throw new ParsingException("Could not get dislike count", e);
+            throw new ParsingException("Could not get dislike count", e, doc);
         }
     }
 
@@ -338,7 +340,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             return doc.select("div[class=\"yt-user-info\"]").first().children()
                     .select("a").first().attr("abs:href");
         } catch (Exception e) {
-            throw new ParsingException("Could not get channel link", e);
+            throw new ParsingException("Could not get channel link", e, doc);
         }
     }
 
@@ -347,11 +349,11 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     private String getStringFromMetaData(String field) {
         assertPageFetched();
         String value = null;
-        if(playerArgs != null) {
+        if (playerArgs != null) {
             // This can not fail
             value = playerArgs.getString(field);
         }
-        if(value == null) {
+        if (value == null) {
             // This can not fail too
             value = videoInfoPage.get(field);
         }
@@ -364,16 +366,16 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         assertPageFetched();
         String name = getStringFromMetaData("author");
 
-        if(name == null) {
+        if (name == null) {
             try {
                 // Fallback to HTML method
                 name = doc.select("div.yt-user-info").first().text();
             } catch (Exception e) {
-                throw new ParsingException("Could not get uploader name", e);
+                throw new ParsingException("Could not get uploader name", e, doc);
             }
         }
-        if(name == null || name.isEmpty()) {
-            throw new ParsingException("Could not get uploader name");
+        if (name == null || name.isEmpty()) {
+            throw new ParsingException("Could not get uploader name", doc);
         }
         return name;
     }
@@ -387,7 +389,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                     .select("img").first()
                     .attr("abs:data-thumb");
         } catch (Exception e) {//todo: add fallback method
-            throw new ParsingException("Could not get uploader thumbnail URL.", e);
+            throw new ParsingException("Could not get uploader thumbnail URL.", e, doc);
         }
     }
 
@@ -430,7 +432,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             if (playerArgs != null && playerArgs.isString("hlsvp")) {
                 return playerArgs.getString("hlsvp");
             } else {
-                throw new ParsingException("Could not get hls manifest url", e);
+                throw new ParsingException("Could not get hls manifest url", e, doc);
             }
         }
     }
@@ -449,7 +451,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                 }
             }
         } catch (Exception e) {
-            throw new ParsingException("Could not get audio streams", e);
+            throw new ParsingException("Could not get audio streams", e, doc);
         }
 
         return audioStreams;
@@ -469,7 +471,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                 }
             }
         } catch (Exception e) {
-            throw new ParsingException("Could not get video streams", e);
+            throw new ParsingException("Could not get video streams", e, doc);
         }
 
         return videoStreams;
@@ -489,7 +491,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                 }
             }
         } catch (Exception e) {
-            throw new ParsingException("Could not get video only streams", e);
+            throw new ParsingException("Could not get video only streams", e, doc);
         }
 
         return videoOnlyStreams;
@@ -521,7 +523,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                 return StreamType.LIVE_STREAM;
             }
         } catch (Exception e) {
-            throw new ParsingException("Could not get hls manifest url", e);
+            throw new ParsingException("Could not get hls manifest url", e, doc);
         }
         return StreamType.VIDEO_STREAM;
     }
@@ -540,7 +542,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             collector.commit(extractVideoPreviewInfo(watch.first().select("li").first()));
             return collector.getItems().get(0);
         } catch (Exception e) {
-            throw new ParsingException("Could not get next video", e);
+            throw new ParsingException("Could not get next video", e, doc);
         }
     }
 
@@ -560,7 +562,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             }
             return collector;
         } catch (Exception e) {
-            throw new ParsingException("Could not get related videos", e);
+            throw new ParsingException("Could not get related videos", e, doc);
         }
     }
 
@@ -675,7 +677,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         try {
             playerArgs = playerConfig.getObject("args");
         } catch (Exception e) {
-            throw new ParsingException("Could not parse yt player config", e);
+            throw new ParsingException("Could not parse yt player config", e, playerConfig.toString());
         }
 
         return playerArgs;
@@ -696,21 +698,21 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             }
             return playerUrl;
         } catch (Exception e) {
-            throw new ParsingException("Could not load decryption code for the Youtube service.", e);
+            throw new ParsingException("Could not load decryption code for the Youtube service.", e, playerConfig.toString());
         }
     }
 
     private JsonObject getPlayerResponse() throws ParsingException {
         try {
             String playerResponseStr;
-            if(playerArgs != null) {
+            if (playerArgs != null) {
                 playerResponseStr = playerArgs.getString("player_response");
             } else {
                 playerResponseStr = videoInfoPage.get("player_response");
             }
             return JsonParser.object().from(playerResponseStr);
         } catch (Exception e) {
-            throw new ParsingException("Could not parse yt player response", e);
+            throw new ParsingException("Could not parse yt player response", e, doc);
         }
     }
 
@@ -735,7 +737,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                 final String sts = Parser.matchGroup1(stsPattern, embedPageContent);
                 return new EmbeddedInfo(playerUrl, sts);
             } catch (Exception i) {
-                // if it failes we simply reply with no sts as then it does not seem to be necessary
+                // if it fails we simply reply with no sts as then it does not seem to be necessary
                 return new EmbeddedInfo(playerUrl, "");
             }
 

@@ -93,7 +93,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
 
             return element.attr("data-channel-external-id");
         } catch (Exception e) {
-            throw new ParsingException("Could not get channel id", e);
+            throw new ParsingException("Could not get channel id", e, doc);
         }
     }
 
@@ -103,7 +103,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
         try {
             return doc.select("meta[property=\"og:title\"]").first().attr("content");
         } catch (Exception e) {
-            throw new ParsingException("Could not get channel name", e);
+            throw new ParsingException("Could not get channel name", e, doc);
         }
     }
 
@@ -112,7 +112,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
         try {
             return doc.select("img[class=\"channel-header-profile-image\"]").first().attr("abs:src");
         } catch (Exception e) {
-            throw new ParsingException("Could not get avatar", e);
+            throw new ParsingException("Could not get avatar", e, doc);
         }
     }
 
@@ -125,7 +125,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
 
             return url.contains("s.ytimg.com") || url.contains("default_banner") ? null : url;
         } catch (Exception e) {
-            throw new ParsingException("Could not get Banner", e);
+            throw new ParsingException("Could not get Banner", e, doc);
         }
     }
 
@@ -134,7 +134,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
         try {
             return CHANNEL_FEED_BASE + getId();
         } catch (Exception e) {
-            throw new ParsingException("Could not get feed url", e);
+            throw new ParsingException("Could not get feed url", e, doc);
         }
     }
 
@@ -147,7 +147,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
             try {
                 return Utils.mixedNumberWordToLong(elTitle);
             } catch (NumberFormatException e) {
-                throw new ParsingException("Could not get subscriber count", e);
+                throw new ParsingException("Could not get subscriber count", e, el.toString());
             }
         } else {
             // If the element is null, the channel have the subscriber count disabled
@@ -160,7 +160,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
         try {
             return doc.select("meta[name=\"description\"]").first().attr("content");
         } catch (Exception e) {
-            throw new ParsingException("Could not get channel description", e);
+            throw new ParsingException("Could not get channel description", e, doc);
         }
     }
 
@@ -185,10 +185,11 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
 
         StreamInfoItemsCollector collector = new StreamInfoItemsCollector(getServiceId());
         JsonObject ajaxJson;
+        String downloadedPage = NewPipe.getDownloader().download(pageUrl);
         try {
-            ajaxJson = JsonParser.object().from(NewPipe.getDownloader().download(pageUrl));
+            ajaxJson = JsonParser.object().from(downloadedPage);
         } catch (JsonParserException pe) {
-            throw new ParsingException("Could not parse json data for next streams", pe);
+            throw new ParsingException("Could not parse json data for next streams", pe, downloadedPage);
         }
 
         final Document ajaxHtml = Jsoup.parse(ajaxJson.getString("content_html"), pageUrl);
@@ -217,7 +218,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
                 return "";
             }
         } catch (Exception e) {
-            throw new ParsingException("Could not get next page url", e);
+            throw new ParsingException("Could not get next page url", e, d);
         }
     }
 
@@ -236,7 +237,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
                             Element dl = el.select("h3").first().select("a").first();
                             return dl.attr("abs:href");
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get web page url for the video", e);
+                            throw new ParsingException("Could not get web page url for the video", e, li.toString());
                         }
                     }
 
@@ -247,7 +248,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
                             Element dl = el.select("h3").first().select("a").first();
                             return dl.text();
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get title", e);
+                            throw new ParsingException("Could not get title", e, li.toString());
                         }
                     }
 
@@ -276,7 +277,7 @@ public class YoutubeChannelExtractor extends ChannelExtractor {
                             }
                             return url;
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get thumbnail url", e);
+                            throw new ParsingException("Could not get thumbnail url", e, li.toString());
                         }
                     }
                 });
