@@ -25,7 +25,7 @@ public class YoutubePlaylistInfoItemExtractor implements PlaylistInfoItemExtract
                 url = te.attr("abs:data-thumb");
             }
         } catch (Exception e) {
-            throw new ParsingException("Failed to extract playlist thumbnail url", e);
+            throw new ParsingException("Failed to extract playlist thumbnail url", e, el.toString());
         }
 
         return url;
@@ -40,7 +40,7 @@ public class YoutubePlaylistInfoItemExtractor implements PlaylistInfoItemExtract
 
             name = title == null ? "" : title.text();
         } catch (Exception e) {
-            throw new ParsingException("Failed to extract playlist name", e);
+            throw new ParsingException("Failed to extract playlist name", e, el.toString());
         }
 
         return name;
@@ -63,7 +63,7 @@ public class YoutubePlaylistInfoItemExtractor implements PlaylistInfoItemExtract
                     .attr("abs:href");
 
         } catch (Exception e) {
-            throw new ParsingException("Failed to extract playlist url", e);
+            throw new ParsingException("Failed to extract playlist url", e, el.toString());
         }
     }
 
@@ -77,7 +77,7 @@ public class YoutubePlaylistInfoItemExtractor implements PlaylistInfoItemExtract
 
             name = div.text();
         } catch (Exception e) {
-            throw new ParsingException("Failed to extract playlist uploader", e);
+            throw new ParsingException("Failed to extract playlist uploader", e, el.toString());
         }
 
         return name;
@@ -91,7 +91,7 @@ public class YoutubePlaylistInfoItemExtractor implements PlaylistInfoItemExtract
 
             return count == null ? 0 : Long.parseLong(Utils.removeNonDigitCharacters(count.text()));
         } catch (Exception e) {
-            throw new ParsingException("Failed to extract playlist stream count", e);
+            throw new ParsingException("Failed to extract playlist stream count", e, el.toString());
         }
     }
 }

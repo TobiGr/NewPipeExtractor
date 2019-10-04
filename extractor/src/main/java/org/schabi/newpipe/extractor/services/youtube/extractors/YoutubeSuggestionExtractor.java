@@ -69,7 +69,7 @@ public class YoutubeSuggestionExtractor extends SuggestionExtractor {
 
             return suggestions;
         } catch (JsonParserException e) {
-            throw new ParsingException("Could not parse json response", e);
+            throw new ParsingException("Could not parse json response", e, response);
         }
     }
 }

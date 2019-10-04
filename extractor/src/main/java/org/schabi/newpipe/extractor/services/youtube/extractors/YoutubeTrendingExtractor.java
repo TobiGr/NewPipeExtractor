@@ -79,7 +79,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
             Element nameSpan = span.select("span").first();
             return nameSpan.text();
         } catch (Exception e) {
-            throw new ParsingException("Could not get Trending name", e);
+            throw new ParsingException("Could not get Trending name", e, doc);
         }
     }
 
@@ -98,7 +98,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                             Element dl = el.select("h3").first().select("a").first();
                             return dl.attr("abs:href");
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get web page url for the video", e);
+                            throw new ParsingException("Could not get web page url for the video", e, el.toString());
                         }
                     }
 
@@ -108,7 +108,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                             Element dl = el.select("h3").first().select("a").first();
                             return dl.text();
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get web page url for the video", e);
+                            throw new ParsingException("Could not get web page url for the video", e, el.toString());
                         }
                     }
 
@@ -121,7 +121,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                             }
                             return link;
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get Uploader name");
+                            throw new ParsingException("Could not get Uploader name", doc);
                         }
                     }
 
@@ -137,7 +137,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                         try {
                             return getUploaderLink().text();
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get Uploader name");
+                            throw new ParsingException("Could not get Uploader name", doc);
                         }
                     }
 
@@ -156,7 +156,7 @@ public class YoutubeTrendingExtractor extends KioskExtractor<StreamInfoItem> {
                             }
                             return url;
                         } catch (Exception e) {
-                            throw new ParsingException("Could not get thumbnail url", e);
+                            throw new ParsingException("Could not get thumbnail url", e, li.toString());
                         }
                     }
                 });

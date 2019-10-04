@@ -21,12 +21,39 @@ package org.schabi.newpipe.extractor.exceptions;
  */
 
 
-public class ParsingException extends ExtractionException {
+import org.jsoup.nodes.Document;
+
+public class ParsingException extends ExtractionException implements ParsedDocumentInfo {
+
+    private String document;
+
     public ParsingException(String message) {
         super(message);
     }
 
     public ParsingException(String message, Throwable cause) {
         super(message, cause);
+    }
+
+    public ParsingException(String message, Document document) {
+        this(message, document.toString());
+    }
+
+    public ParsingException(String message, String document) {
+        super(message);
+        this.document = document;
+    }
+
+    public ParsingException(String message, Throwable cause, Document document) {
+        this(message, cause, document.toString());
+    }
+
+    public ParsingException(String message, Throwable cause, String document) {
+        super(message, cause);
+        this.document = document;
+    }
+
+    public String getDocument() {
+        return document;
     }
 }
