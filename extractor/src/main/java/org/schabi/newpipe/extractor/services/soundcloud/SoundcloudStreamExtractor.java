@@ -1,5 +1,6 @@
 package org.schabi.newpipe.extractor.services.soundcloud;
 
+import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
@@ -146,6 +147,9 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
         String apiUrl = "https://api.soundcloud.com/i1/tracks/" + urlEncode(getId()) + "/streams"
                 + "?client_id=" + urlEncode(SoundcloudParsingHelper.clientId());
 
+        apiUrl = "https://api-v2.soundcloud.com/tracks/" + urlEncode(getId()) //+ "/streams"
+                + "?client_id=" + urlEncode(SoundcloudParsingHelper.clientId());
+
         String response = dl.get(apiUrl, getExtractorLocalization()).responseBody();
         JsonObject responseObject;
         try {
@@ -154,11 +158,25 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
             throw new ParsingException("Could not parse json response", e);
         }
 
-        String mp3Url = responseObject.getString("http_mp3_128_url");
-        if (mp3Url != null && !mp3Url.isEmpty()) {
-            audioStreams.add(new AudioStream(mp3Url, MediaFormat.MP3, 128));
-        } else {
-            throw new ExtractionException("Could not get SoundCloud's track audio url");
+        //if (!responseObject.getBoolean("downloadable")) return audioStreams;
+
+        try {
+            JsonArray transcodings = responseObject.getObject("media").getArray("transcodings");
+            for (int i = 0; i < transcodings.size(); i++) {
+                JsonObject o = (JsonObject) transcodings.get(i);
+                if (o.getString("preset").equals("mp3_0_0")) {
+                    String mp3Url = o.getString("url");
+                    if (mp3Url != null && !mp3Url.isEmpty()) {
+                        audioStreams.add(new AudioStream(mp3Url, MediaFormat.MP3, 128));
+                    } else {
+                        throw new ExtractionException("Could not get SoundCloud's track audio url");
+                    }
+                }
+
+            }
+
+        } catch (NullPointerException e) {
+            throw new ExtractionException("Could not get SoundCloud's track audio url", e);
         }
 
         return audioStreams;
