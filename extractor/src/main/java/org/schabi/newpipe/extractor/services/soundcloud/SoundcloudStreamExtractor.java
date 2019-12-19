@@ -162,16 +162,17 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
 
         try {
             JsonArray transcodings = responseObject.getObject("media").getArray("transcodings");
-            for (int i = 0; i < transcodings.size(); i++) {
-                JsonObject o = (JsonObject) transcodings.get(i);
-                if (o.getString("preset").equals("mp3_0_0")) {
-                    String mp3Url = o.getString("url");
-                    if (mp3Url != null && !mp3Url.isEmpty()) {
-                        audioStreams.add(new AudioStream(mp3Url, MediaFormat.MP3, 128));
-                    } else {
-                        throw new ExtractionException("Could not get SoundCloud's track audio url");
+            for (Object transcoding : transcodings) {
+                JsonObject o = (JsonObject) transcoding;
+                String url = o.getString("url");
+                if (url != null && !url.isEmpty()) {
+                    if (o.getString("preset").contains("mp3")) {
+                        audioStreams.add(new AudioStream(url, MediaFormat.MP3, 128));
+                    } else if (o.getString("preset").contains("opus")) {
+                        audioStreams.add(new AudioStream(url, MediaFormat.OPUS, 128));
                     }
                 }
+
 
             }
 
