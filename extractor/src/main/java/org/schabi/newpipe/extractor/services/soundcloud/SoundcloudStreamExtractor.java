@@ -166,10 +166,18 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
                 JsonObject o = (JsonObject) transcoding;
                 String url = o.getString("url") + "?client_id=" + SoundcloudParsingHelper.clientId();
                 if (url != null && !url.isEmpty()) {
+                    String res = dl.get(url).responseBody();
+                    JsonObject jsonObject2;
+                    try {
+                        jsonObject2= JsonParser.object().from(res);
+                    } catch (JsonParserException e) {
+                        throw new ParsingException("Could not parse streamable url", e);
+                    }
+                    String streamableUrl = jsonObject2.getString("url");
                     if (o.getString("preset").contains("mp3")) {
-                        audioStreams.add(new AudioStream(url, MediaFormat.MP3, 128));
+                        audioStreams.add(new AudioStream(streamableUrl, MediaFormat.MP3, 128));
                     } else if (o.getString("preset").contains("opus")) {
-                        audioStreams.add(new AudioStream(url, MediaFormat.OPUS, 128));
+                        audioStreams.add(new AudioStream(streamableUrl, MediaFormat.OPUS, 128));
                     }
                 }
 
