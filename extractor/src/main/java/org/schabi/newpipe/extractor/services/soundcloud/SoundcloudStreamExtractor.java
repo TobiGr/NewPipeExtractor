@@ -164,7 +164,7 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
             JsonArray transcodings = responseObject.getObject("media").getArray("transcodings");
             for (Object transcoding : transcodings) {
                 JsonObject o = (JsonObject) transcoding;
-                String url = o.getString("url");
+                String url = o.getString("url") + "&client_id=" + SoundcloudParsingHelper.clientId();
                 if (url != null && !url.isEmpty()) {
                     if (o.getString("preset").contains("mp3")) {
                         audioStreams.add(new AudioStream(url, MediaFormat.MP3, 128));
