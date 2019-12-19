@@ -158,7 +158,9 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
             throw new ParsingException("Could not parse json response", e);
         }
 
-        //if (!responseObject.getBoolean("streamable")) return audioStreams;
+        // streams can now be streamable and downloadable
+        // we only care whether it is streamable; if it is not, this track might not be published yet
+        if (!responseObject.getBoolean("streamable")) return audioStreams;
 
         try {
             JsonArray transcodings = responseObject.getObject("media").getArray("transcodings");
@@ -174,13 +176,20 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
                     } catch (JsonParserException e) {
                         throw new ParsingException("Could not parse streamable url", e);
                     }
-                    // m3u
+
+
+                    // links in the m3u file are only valid for a short period
+                    // we need to move this into a separate method to generate valid urls when needed (e.g. resuming a stream)
                     String m3uUrl = jsonObject2.getString("url");
+
+                    // a complete list of all formats is missing, we need to check if there are more in use
                     if (o.getString("preset").contains("mp3")) {
                         audioStreams.add(new AudioStream(m3uUrl, MediaFormat.MP3, 128));
                     } else if (o.getString("preset").contains("opus")) {
+                        // the mp3 bitrate is correct, but I am not ure about the opus rate
                         audioStreams.add(new AudioStream(m3uUrl, MediaFormat.OPUS, 128));
                     }
+
                 }
 
             }
