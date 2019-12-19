@@ -158,14 +158,15 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
             throw new ParsingException("Could not parse json response", e);
         }
 
-        //if (!responseObject.getBoolean("downloadable")) return audioStreams;
+        //if (!responseObject.getBoolean("streamable")) return audioStreams;
 
         try {
             JsonArray transcodings = responseObject.getObject("media").getArray("transcodings");
             for (Object transcoding : transcodings) {
                 JsonObject o = (JsonObject) transcoding;
-                String url = o.getString("url") + "?client_id=" + SoundcloudParsingHelper.clientId();
+                String url = o.getString("url");
                 if (url != null && !url.isEmpty()) {
+                    url += "?client_id=" + SoundcloudParsingHelper.clientId();
                     String res = dl.get(url).responseBody();
                     JsonObject jsonObject2;
                     try {
@@ -173,14 +174,14 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
                     } catch (JsonParserException e) {
                         throw new ParsingException("Could not parse streamable url", e);
                     }
-                    String streamableUrl = jsonObject2.getString("url");
+                    // m3u
+                    String m3uUrl = jsonObject2.getString("url");
                     if (o.getString("preset").contains("mp3")) {
-                        audioStreams.add(new AudioStream(streamableUrl, MediaFormat.MP3, 128));
+                        audioStreams.add(new AudioStream(m3uUrl, MediaFormat.MP3, 128));
                     } else if (o.getString("preset").contains("opus")) {
-                        audioStreams.add(new AudioStream(streamableUrl, MediaFormat.OPUS, 128));
+                        audioStreams.add(new AudioStream(m3uUrl, MediaFormat.OPUS, 128));
                     }
                 }
-
 
             }
 
