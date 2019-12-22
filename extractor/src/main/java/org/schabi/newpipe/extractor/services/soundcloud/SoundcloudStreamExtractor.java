@@ -188,7 +188,20 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
                         } catch (JsonParserException e) {
                             throw new ParsingException("Could not parse streamable url", e);
                         }
+                    } else if (t.getString("preset").contains("opus")) {
+                        url += "?client_id=" + SoundcloudParsingHelper.clientId();
+                        String res = dl.get(url).responseBody();
+
+                        try {
+                            JsonObject mp3UrlObject = JsonParser.object().from(res);
+                            // Links in this file are also only valid for a short period.
+                            audioStreams.add(new AudioStream(mp3UrlObject.getString("url"),
+                                    MediaFormat.OPUS, 128));
+                        } catch (JsonParserException e) {
+                            throw new ParsingException("Could not parse streamable url", e);
+                        }
                     }
+
                 }
             }
 
