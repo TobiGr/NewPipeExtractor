@@ -126,6 +126,11 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
         return conference.getString("conference");
     }
 
+    @Override
+    public boolean isUploaderVerified() {
+        return false;
+    }
+
     @Nonnull
     @Override
     public String getUploaderAvatarUrl() {

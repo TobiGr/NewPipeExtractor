@@ -93,6 +93,7 @@ public class YoutubeStreamExtractorDefaultTest {
         @Override public StreamType expectedStreamType() { return StreamType.VIDEO_STREAM; }
         @Override public String expectedUploaderName() { return "PewDiePie"; }
         @Override public String expectedUploaderUrl() { return "https://www.youtube.com/channel/UC-lHJZR3Gqxm24_Vd_AJ5Yw"; }
+        @Override public boolean expectedIsUploaderVerified() { return true; }
         @Override public List<String> expectedDescriptionContains() {
             return Arrays.asList("https://www.youtube.com/channel/UC7l23W7gFi4Uho6WSzckZRA",
                     "https://www.handcraftpictures.com/");
@@ -246,6 +247,7 @@ public class YoutubeStreamExtractorDefaultTest {
         @Override public StreamType expectedStreamType() { return StreamType.VIDEO_STREAM; }
         @Override public String expectedUploaderName() { return "maiLab"; }
         @Override public String expectedUploaderUrl() { return "https://www.youtube.com/channel/UCyHDQ5C6z1NDmJ4g6SerW8g"; }
+        @Override public boolean expectedIsUploaderVerified() { return true; }
         @Override public List<String> expectedDescriptionContains() {
             return Arrays.asList("Vitamin", "2:44", "Was ist Vitamin D?");
         }

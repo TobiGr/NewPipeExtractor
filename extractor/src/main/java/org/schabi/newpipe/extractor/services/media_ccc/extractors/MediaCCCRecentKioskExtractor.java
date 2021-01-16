@@ -68,6 +68,11 @@ public class MediaCCCRecentKioskExtractor implements StreamInfoItemExtractor {
                 .getUrl(); // web URL
     }
 
+    @Override
+    public boolean isUploaderVerified() {
+        return false;
+    }
+
     @Nullable
     @Override
     public String getTextualUploadDate() throws ParsingException {

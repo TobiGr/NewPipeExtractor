@@ -2,6 +2,7 @@ package org.schabi.newpipe.extractor.services.soundcloud.extractors;
 
 import com.grack.nanojson.JsonObject;
 import org.schabi.newpipe.extractor.channel.ChannelInfoItemExtractor;
+import org.schabi.newpipe.extractor.exceptions.ParsingException;
 
 import static org.schabi.newpipe.extractor.utils.JsonUtils.EMPTY_STRING;
 import static org.schabi.newpipe.extractor.utils.Utils.replaceHttpWithHttps;
@@ -38,6 +39,11 @@ public class SoundcloudChannelInfoItemExtractor implements ChannelInfoItemExtrac
     @Override
     public long getStreamCount() {
         return itemObject.getLong("track_count");
+    }
+
+    @Override
+    public boolean isVerified() throws ParsingException {
+        return false;
     }
 
     @Override

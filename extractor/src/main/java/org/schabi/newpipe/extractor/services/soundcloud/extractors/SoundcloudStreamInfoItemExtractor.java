@@ -44,6 +44,11 @@ public class SoundcloudStreamInfoItemExtractor implements StreamInfoItemExtracto
     }
 
     @Override
+    public boolean isUploaderVerified() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public String getTextualUploadDate() {
         return itemObject.getString("created_at");
     }

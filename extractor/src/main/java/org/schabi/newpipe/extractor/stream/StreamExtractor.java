@@ -172,6 +172,14 @@ public abstract class StreamExtractor extends Extractor {
     public abstract String getUploaderName() throws ParsingException;
 
     /**
+     * Whether the uploader has been verified by the service's provider.
+     * If there is no verification implemented, return <code>false</code>.
+     * @return whether the uploader has been verified by the service's provider
+     * @throws ParsingException
+     */
+    public abstract boolean isUploaderVerified() throws ParsingException;
+
+    /**
      * The url to the image file/profile picture/avatar of the creator/uploader of the stream.
      * If the url is not available you can return an empty String.
      *

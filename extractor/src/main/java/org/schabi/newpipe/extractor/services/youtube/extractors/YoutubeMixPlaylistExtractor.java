@@ -114,6 +114,11 @@ public class YoutubeMixPlaylistExtractor extends PlaylistExtractor {
     }
 
     @Override
+    public boolean isUploaderVerified() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getStreamCount() {
         // Auto-generated playlist always start with 25 videos and are endless
         return ListExtractor.ITEM_COUNT_INFINITE;

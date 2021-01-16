@@ -112,6 +112,11 @@ public class SoundcloudPlaylistExtractor extends PlaylistExtractor {
     }
 
     @Override
+    public boolean isUploaderVerified() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getStreamCount() {
         return playlist.getLong("track_count");
     }

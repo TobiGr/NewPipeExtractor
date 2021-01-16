@@ -60,6 +60,11 @@ public class PeertubePlaylistExtractor extends PlaylistExtractor {
     }
 
     @Override
+    public boolean isUploaderVerified() {
+        return false;
+    }
+
+    @Override
     public long getStreamCount() {
         return playlistInfo.getLong("videosLength");
     }

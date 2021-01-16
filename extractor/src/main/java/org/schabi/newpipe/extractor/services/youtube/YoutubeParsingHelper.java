@@ -779,4 +779,28 @@ public class YoutubeParsingHelper {
         }
         return url;
     }
+
+    /**
+     * Check whether
+     * @param object videoInfo or
+     * @return
+     */
+    public static boolean isCreatorVerified(JsonObject object) {
+        JsonArray badges = null;
+        if (object.has("badges")) {
+            badges = object.getArray("badges");
+        } else if (object.has("ownerBadges")) {
+            badges = object.getArray("badges");
+        }
+        if (badges == null) {
+            return false;
+        }
+        for (int i = 0; i < badges.size(); i++) {
+            if (badges.getObject(i).getObject("metadataBadgeRenderer")
+                    .getString("style").equals("BADGE_STYLE_TYPE_VERIFIED")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

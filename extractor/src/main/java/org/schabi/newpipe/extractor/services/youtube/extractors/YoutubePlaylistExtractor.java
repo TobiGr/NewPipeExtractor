@@ -139,6 +139,11 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
     }
 
     @Override
+    public boolean isUploaderVerified() throws ParsingException {
+        return false;
+    }
+
+    @Override
     public long getStreamCount() throws ParsingException {
         try {
             final String viewsText = getTextFromObject(getPlaylistInfo().getArray("stats").getObject(0));
@@ -309,6 +314,11 @@ public class YoutubePlaylistExtractor extends PlaylistExtractor {
             @Override
             public String getUploaderUrl() throws ParsingException {
                 return YoutubePlaylistExtractor.this.getUploaderUrl();
+            }
+
+            @Override
+            public boolean isUploaderVerified() throws ParsingException {
+                return YoutubePlaylistExtractor.this.isUploaderVerified();
             }
 
             @Nullable

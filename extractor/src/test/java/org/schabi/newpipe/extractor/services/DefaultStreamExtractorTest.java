@@ -45,6 +45,7 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
     public abstract StreamType expectedStreamType();
     public abstract String expectedUploaderName();
     public abstract String expectedUploaderUrl();
+    public boolean expectedIsUploaderVerified() { return false; }
     public String expectedSubChannelName() { return ""; } // default: there is no subchannel
     public String expectedSubChannelUrl() { return ""; } // default: there is no subchannel
     public abstract List<String> expectedDescriptionContains(); // e.g. for full links
@@ -91,6 +92,11 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
         final String uploaderUrl = extractor().getUploaderUrl();
         assertIsSecureUrl(uploaderUrl);
         assertEquals(expectedUploaderUrl(), uploaderUrl);
+    }
+
+    @Test
+    public void testIsUploaderVerified() throws Exception {
+        assertEquals(expectedIsUploaderVerified(), extractor().isUploaderVerified());
     }
 
     @Test

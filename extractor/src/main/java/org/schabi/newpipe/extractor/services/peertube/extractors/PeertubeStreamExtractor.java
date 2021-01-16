@@ -154,6 +154,11 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         return JsonUtils.getString(json, "account.displayName");
     }
 
+    @Override
+    public boolean isUploaderVerified() {
+        return false;
+    }
+
     @Nonnull
     @Override
     public String getUploaderAvatarUrl() {

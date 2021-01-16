@@ -46,6 +46,11 @@ public class MediaCCCStreamInfoItemExtractor implements StreamInfoItemExtractor 
         return event.getString("conference_url");
     }
 
+    @Override
+    public boolean isUploaderVerified() {
+        return false;
+    }
+
     @Nullable
     @Override
     public String getTextualUploadDate() {

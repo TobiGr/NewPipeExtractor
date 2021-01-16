@@ -72,6 +72,13 @@ public interface StreamInfoItemExtractor extends InfoItemExtractor {
     String getUploaderUrl() throws ParsingException;
 
     /**
+     * Whether the uploader has been verified by the service provider.
+     * @return <code>true</code> if the uploader is verified; <code>false</code> otherwise
+     * @throws ParsingException if there is an error during extraction
+     */
+    boolean isUploaderVerified() throws ParsingException;
+
+    /**
      * The original textual date provided by the service. Should be used as a fallback if
      * {@link #getUploadDate()} isn't provided by the service, or it fails for some reason.
      *

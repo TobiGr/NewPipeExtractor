@@ -109,6 +109,11 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
                 .replaceFirst("https://(api\\.)?media\\.ccc\\.de/public/conferences/", "");
     }
 
+    @Override
+    public boolean isUploaderVerified() {
+        return false;
+    }
+
     @Nonnull
     @Override
     public String getUploaderAvatarUrl() {
