@@ -1050,6 +1050,10 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     @Override
     public List<Frameset> getFrames() throws ExtractionException {
         try {
+            if (!playerResponse.has("storyboards")) {
+                // this might be the case when the video is very short
+                return Collections.emptyList();
+            }
             final JsonObject storyboards = playerResponse.getObject("storyboards");
             final JsonObject storyboardsRenderer;
             if (storyboards.has("playerLiveStoryboardSpecRenderer")) {
@@ -1081,10 +1085,13 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                 final int totalCount = Integer.parseInt(parts[2]);
                 final int framesPerPageX = Integer.parseInt(parts[3]);
                 final int framesPerPageY = Integer.parseInt(parts[4]);
-                final String baseUrl = url.replace("$L", String.valueOf(i - 1)).replace("$N", parts[6]) + "&sigh=" + parts[7];
+                final String baseUrl = url
+                        .replace("$L", String.valueOf(i - 1))
+                        .replace("$N", parts[6]) + "&sigh=" + parts[7];
                 final List<String> urls;
                 if (baseUrl.contains("$M")) {
-                    final int totalPages = (int) Math.ceil(totalCount / (double) (framesPerPageX * framesPerPageY));
+                    final int totalPages =
+                            (int) Math.ceil(totalCount / (double) (framesPerPageX * framesPerPageY));
                     urls = new ArrayList<>(totalPages);
                     for (int j = 0; j < totalPages; j++) {
                         urls.add(baseUrl.replace("$M", String.valueOf(j)));
