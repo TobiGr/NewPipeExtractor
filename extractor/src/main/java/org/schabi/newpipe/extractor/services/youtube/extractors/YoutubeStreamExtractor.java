@@ -93,6 +93,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     private JsonObject initialData;
     @Nonnull
     private final Map<String, String> videoInfoPage = new HashMap<>();
+    private JsonObject playabilityStatus;
     private JsonObject playerResponse;
     private JsonObject videoPrimaryInfoRenderer;
     private JsonObject videoSecondaryInfoRenderer;
@@ -616,6 +617,9 @@ public class YoutubeStreamExtractor extends StreamExtractor {
     @Override
     public StreamType getStreamType() {
         assertPageFetched();
+        if (isPremiere()) {
+            return StreamType.UPCOMING_STREAM;
+        }
         return playerResponse.getObject("streamingData").has(FORMATS)
                 ? StreamType.VIDEO_STREAM : StreamType.LIVE_STREAM;
     }
@@ -737,7 +741,7 @@ public class YoutubeStreamExtractor extends StreamExtractor {
             youtubePlayerResponse = playerResponse;
         }
 
-        JsonObject playabilityStatus = (playerResponse == null ? youtubePlayerResponse : playerResponse)
+        playabilityStatus = (playerResponse == null ? youtubePlayerResponse : playerResponse)
                 .getObject("playabilityStatus");
         String status = playabilityStatus.getString("status");
         // If status exist, and is not "OK", throw the specific exception based on error message
@@ -786,8 +790,9 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                     }
                 }
             }
-
-            throw new ContentNotAvailableException("Got error: \"" + reason + "\"");
+            if (!status.equalsIgnoreCase("LIVE_STREAM_OFFLINE")) {
+                throw new ContentNotAvailableException("Got error: \"" + reason + "\"");
+            }
         }
     }
 
@@ -1216,5 +1221,10 @@ public class YoutubeStreamExtractor extends StreamExtractor {
         return YoutubeParsingHelper.getMetaInfo(
                 initialData.getObject("contents").getObject("twoColumnWatchNextResults")
                         .getObject("results").getObject("results").getArray("contents"));
+    }
+
+    private boolean isPremiere() {
+        return playabilityStatus != null && playabilityStatus.getString("status")
+                .equalsIgnoreCase("LIVE_STREAM_OFFLINE");
     }
 }

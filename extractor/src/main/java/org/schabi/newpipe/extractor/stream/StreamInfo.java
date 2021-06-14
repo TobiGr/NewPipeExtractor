@@ -116,8 +116,12 @@ public class StreamInfo extends Info {
     private static StreamInfo extractStreams(StreamInfo streamInfo, StreamExtractor extractor)
             throws ExtractionException {
         /* ---- stream extraction goes here ---- */
-        // At least one type of stream has to be available,
-        // otherwise an exception will be thrown directly into the frontend.
+        // There are two different StreamTypes:
+        // - stream types with a playable stream
+        // - future / upcoming streams without a playable stream
+        //
+        // If there is no stream available for the first group of stream types,
+        // an exception will be thrown.
 
         try {
             streamInfo.setDashMpdUrl(extractor.getDashMpdUrl());
@@ -179,19 +183,21 @@ public class StreamInfo extends Info {
             }
         }
 
-        // Either audio or video has to be available, otherwise we didn't get a stream
-        // (since videoOnly are optional, they don't count).
-        if ((streamInfo.videoStreams.isEmpty()) && (streamInfo.audioStreams.isEmpty())) {
+        if (streamInfo.streamType != StreamType.UPCOMING_STREAM) {
+            // Either audio or video has to be available, otherwise we didn't get a stream
+            // (since videoOnly are optional, they don't count).
+            if ((streamInfo.videoStreams.isEmpty()) && (streamInfo.audioStreams.isEmpty())) {
 
-            if (dashMpdError != null) {
-                // If we don't have any video or audio and the dashMpd 'errored', add it to the
-                // error list
-                // (it's optional and it don't get added automatically, but it's good to have
-                // some additional error context)
-                streamInfo.addError(dashMpdError);
+                if (dashMpdError != null) {
+                    // If we don't have any video or audio and the dashMpd 'errored', add it to the
+                    // error list
+                    // (it's optional and it don't get added automatically, but it's good to have
+                    // some additional error context)
+                    streamInfo.addError(dashMpdError);
+                }
+
+                throw new StreamExtractException("Could not get any stream. See error variable to get further details.");
             }
-
-            throw new StreamExtractException("Could not get any stream. See error variable to get further details.");
         }
 
         return streamInfo;

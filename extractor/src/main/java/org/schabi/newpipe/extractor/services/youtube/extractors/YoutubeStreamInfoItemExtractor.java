@@ -61,6 +61,10 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
             return cachedStreamType;
         }
 
+        if (isPremiere()) {
+            return cachedStreamType = StreamType.UPCOMING_STREAM;
+        }
+
         final JsonArray badges = videoInfo.getArray("badges");
         for (final Object badge : badges) {
             if (((JsonObject) badge).getObject("metadataBadgeRenderer")
@@ -72,7 +76,7 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
         final JsonArray thumbnailOverlays = videoInfo.getArray("thumbnailOverlays");
         for (final Object object : thumbnailOverlays) {
             final JsonObject thumbnailOverlay = (JsonObject) object;
-            if (thumbnailOverlay.has("thumbnailOverlayNowPlayingRenderer")) {
+            if (thumbnailOverlay.has("thumbnailOverlayTimeStatusRenderer")) {
                 final String overlayText = thumbnailOverlay
                         .getObject("thumbnailOverlayTimeStatusRenderer")
                         .getString("style", EMPTY_STRING);
@@ -81,6 +85,11 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
                     return cachedStreamType = StreamType.LIVE_STREAM;
                 }
             }
+        }
+
+        if (videoInfo.getObject("channelRenderer").getObject("title")
+                .getString("simpleText", EMPTY_STRING).equalsIgnoreCase("LIVE")) {
+            return cachedStreamType = StreamType.LIVE_STREAM;
         }
 
         return cachedStreamType = StreamType.VIDEO_STREAM;
@@ -110,7 +119,8 @@ public class YoutubeStreamInfoItemExtractor implements StreamInfoItemExtractor {
 
     @Override
     public long getDuration() throws ParsingException {
-        if (getStreamType() == StreamType.LIVE_STREAM || isPremiere()) {
+        if (getStreamType() == StreamType.LIVE_STREAM
+                || getStreamType() == StreamType.UPCOMING_STREAM) {
             return -1;
         }
 
