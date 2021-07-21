@@ -1,6 +1,6 @@
 allprojects {
     apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
+    apply plugin: 'maven'
 
     compileJava.options.encoding = 'UTF-8'
     compileTestJava.options.encoding = 'UTF-8'
