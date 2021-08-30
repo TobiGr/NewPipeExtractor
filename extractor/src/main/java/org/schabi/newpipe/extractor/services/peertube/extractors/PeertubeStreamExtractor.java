@@ -223,7 +223,9 @@ public class PeertubeStreamExtractor extends StreamExtractor {
             try {
                 final JsonArray streamingPlaylists = json.getArray("streamingPlaylists");
                 for (final Object p : streamingPlaylists) {
-                    if (!(p instanceof JsonObject)) continue;
+                    if (!(p instanceof JsonObject)) {
+                        continue;
+                    }
                     final JsonObject playlist = (JsonObject) p;
                     final String playlistUrl = playlist.getString("playlistUrl");
                     audioStreams.addAll(getAudioStreamsFromArray(playlist.getArray("files"),
@@ -243,7 +245,7 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         try {
             final List<AudioStream> audioStreams = new ArrayList<>();
             for (final Object s : streams) {
-                if (!(s instanceof JsonObject)){
+                if (!(s instanceof JsonObject)) {
                     continue;
                 }
                 final JsonObject stream = (JsonObject) s;
@@ -356,7 +358,9 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         try {
             final List<VideoStream> videoStreams = new ArrayList<>();
             for (final Object s : streams) {
-                if (!(s instanceof JsonObject)) continue;
+                if (!(s instanceof JsonObject)) {
+                    continue;
+                }
                 final JsonObject stream = (JsonObject) s;
                 final String url;
                 final String idSuffix;
@@ -449,8 +453,8 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         final String apiUrl;
         if (tags.isEmpty()) {
             apiUrl = baseUrl + "/api/v1/accounts/" + JsonUtils.getString(json, "account.name")
-                    + "@" + JsonUtils.getString(json, "account.host") +
-                    "/videos?start=0&count=8";
+                    + "@" + JsonUtils.getString(json, "account.host")
+                    + "/videos?start=0&count=8";
         } else {
             apiUrl = getRelatedItemsUrl(tags);
         }
@@ -591,8 +595,9 @@ public class PeertubeStreamExtractor extends StreamExtractor {
                         final String languageCode = JsonUtils.getString(caption, "language.id");
                         final String ext = url.substring(url.lastIndexOf(".") + 1);
                         final MediaFormat fmt = MediaFormat.getFromSuffix(ext);
-                        if (fmt != null && !isNullOrEmpty(languageCode))
+                        if (fmt != null && !isNullOrEmpty(languageCode)) {
                             subtitles.add(new SubtitlesStream(url, fmt, languageCode, false));
+                        }
                     }
                 }
             } catch (final Exception e) {

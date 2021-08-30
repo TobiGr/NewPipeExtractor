@@ -261,12 +261,23 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
 
             for (final VideoStream stream : videoStreams) {
                 if (stream.isUrl()) assertIsSecureUrl(stream.getContent());
-                assertFalse(stream.getResolution().isEmpty());
+                final StreamType streamType = extractor().getStreamType();
+                // The resolution can be empty on some streams, especially livestreams
+                // (like streams with HLS master playlists)
+                if (streamType != StreamType.LIVE_STREAM
+                        && streamType != StreamType.AUDIO_LIVE_STREAM) {
+                    assertFalse(stream.getResolution().isEmpty());
+                }
 
-                final int formatId = stream.getFormatId();
-                // see MediaFormat: video stream formats range from 0 to 0x100
-                assertTrue("format id does not fit a video stream: " + formatId,
-                        0 <= formatId && formatId < 0x100);
+                // Like the resolution, the format can be unknown on some streams, especially
+                // livestreams
+                if (streamType != StreamType.LIVE_STREAM
+                        && streamType != StreamType.AUDIO_LIVE_STREAM) {
+                    final int formatId = stream.getFormatId();
+                    // see MediaFormat: video stream formats range from 0 to 0x100
+                    assertTrue("format id does not fit a video stream: " + formatId,
+                            0 <= formatId && formatId < 0x100);
+                }
             }
         } else {
             assertTrue(videoStreams.isEmpty());
@@ -285,10 +296,13 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
             for (final AudioStream stream : audioStreams) {
                 if (stream.isUrl()) assertIsSecureUrl(stream.getContent());
 
-                final int formatId = stream.getFormat().id;
-                // see MediaFormat: video stream formats range from 0x100 to 0x1000
-                assertTrue("format id does not fit an audio stream: " + formatId,
-                        0x100 <= formatId && formatId < 0x1000);
+                // The media format can be unknown on some audio streams
+                if (stream.getFormat() != null) {
+                    final int formatId = stream.getFormat().id;
+                    // see MediaFormat: audio stream formats range from 0x100 to 0x1000
+                    assertTrue("format id does not fit an audio stream: " + formatId,
+                            0x100 <= formatId && formatId < 0x1000);
+                }
             }
         } else {
             assertTrue(audioStreams.isEmpty());
