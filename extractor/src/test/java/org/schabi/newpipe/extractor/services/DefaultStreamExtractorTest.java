@@ -260,7 +260,9 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
             assertFalse(videoStreams.isEmpty());
 
             for (final VideoStream stream : videoStreams) {
-                if (stream.isUrl()) assertIsSecureUrl(stream.getContent());
+                if (stream.isUrl()) {
+                    assertIsSecureUrl(stream.getContent());
+                }
                 final StreamType streamType = extractor().getStreamType();
                 // The resolution can be empty on some streams, especially livestreams
                 // (like streams with HLS master playlists)
@@ -294,7 +296,9 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
             assertFalse(audioStreams.isEmpty());
 
             for (final AudioStream stream : audioStreams) {
-                if (stream.isUrl()) assertIsSecureUrl(stream.getContent());
+                if (stream.isUrl()) {
+                    assertIsSecureUrl(stream.getContent());
+                }
 
                 // The media format can be unknown on some audio streams
                 if (stream.getFormat() != null) {
@@ -319,7 +323,9 @@ public abstract class DefaultStreamExtractorTest extends DefaultExtractorTest<St
             assertFalse(subtitles.isEmpty());
 
             for (final SubtitlesStream stream : subtitles) {
-                if (stream.isUrl()) assertIsSecureUrl(stream.getContent());
+                if (stream.isUrl()) {
+                    assertIsSecureUrl(stream.getContent());
+                }
 
                 final int formatId = stream.getFormatId();
                 // see MediaFormat: video stream formats range from 0x1000 to 0x10000
