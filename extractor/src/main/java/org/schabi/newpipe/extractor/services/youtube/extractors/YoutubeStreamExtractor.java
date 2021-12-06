@@ -1282,8 +1282,10 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                                     "-1")));
                             itagItem.setQuality(formatData.getString("quality"));
                             itagItem.setCodec(codec);
-                            itagItem.setTargetDurationSec(formatData.getInt("targetDurationSec"));
-
+                            if (streamType != StreamType.VIDEO_STREAM) {
+                                itagItem.setTargetDurationSec(formatData.getInt(
+                                        "targetDurationSec"));
+                            }
                             if (itagType == ItagItem.ItagType.VIDEO
                                     || itagType == ItagItem.ItagType.VIDEO_ONLY) {
                                 itagItem.fps = formatData.getInt("fps");
@@ -1293,6 +1295,9 @@ public class YoutubeStreamExtractor extends StreamExtractor {
                                         "audioSampleRate")));
                                 itagItem.setAudioChannels(formatData.getInt("audioChannels"));
                             }
+                            itagItem.setContentLength(Integer.parseInt(formatData.getString(
+                                    "contentLength", "-1")));
+
                             final ItagInfo itagInfo = new ItagInfo(streamUrl, itagItem);
 
                             if (streamType == StreamType.VIDEO_STREAM) {
