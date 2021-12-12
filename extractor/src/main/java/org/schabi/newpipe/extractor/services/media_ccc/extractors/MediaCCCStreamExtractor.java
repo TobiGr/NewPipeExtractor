@@ -27,10 +27,14 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.schabi.newpipe.extractor.stream.AudioStream.UNKNOWN_BITRATE;
+import static org.schabi.newpipe.extractor.utils.Utils.EMPTY_STRING;
 
 public class MediaCCCStreamExtractor extends StreamExtractor {
     private JsonObject data;
     private JsonObject conferenceData;
+
+    private final List<AudioStream> audioStreams = new ArrayList<>();
+    private final List<VideoStream> videoStreams = new ArrayList<>();
 
     public MediaCCCStreamExtractor(final StreamingService service, final LinkHandler linkHandler) {
         super(service, linkHandler);
@@ -62,7 +66,7 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
 
     @Override
     public int getAgeLimit() {
-        return 0;
+        return NO_AGE_LIMIT;
     }
 
     @Override
@@ -117,55 +121,56 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getSubChannelUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getSubChannelName() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getSubChannelAvatarUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getDashMpdUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getHlsUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Override
     public List<AudioStream> getAudioStreams() throws ExtractionException {
-        final JsonArray recordings = data.getArray("recordings");
-        final List<AudioStream> audioStreams = new ArrayList<>();
-        for (int i = 0; i < recordings.size(); i++) {
-            final JsonObject recording = recordings.getObject(i);
-            final String mimeType = recording.getString("mime_type");
-            if (mimeType.startsWith("audio")) {
-                // First we need to resolve the actual video data from CDN
-                final MediaFormat mediaFormat;
-                if (mimeType.endsWith("opus")) {
-                    mediaFormat = MediaFormat.OPUS;
-                } else if (mimeType.endsWith("mpeg")) {
-                    mediaFormat = MediaFormat.MP3;
-                } else if (mimeType.endsWith("ogg")) {
-                    mediaFormat = MediaFormat.OGG;
-                } else {
-                    mediaFormat = null;
-                }
+        if (audioStreams.isEmpty()) {
+            final JsonArray recordings = data.getArray("recordings");
+            for (int i = 0; i < recordings.size(); i++) {
+                final JsonObject recording = recordings.getObject(i);
+                final String mimeType = recording.getString("mime_type");
+                if (mimeType.startsWith("audio")) {
+                    // First we need to resolve the actual video data from CDN
+                    final MediaFormat mediaFormat;
+                    if (mimeType.endsWith("opus")) {
+                        mediaFormat = MediaFormat.OPUS;
+                    } else if (mimeType.endsWith("mpeg")) {
+                        mediaFormat = MediaFormat.MP3;
+                    } else if (mimeType.endsWith("ogg")) {
+                        mediaFormat = MediaFormat.OGG;
+                    } else {
+                        mediaFormat = null;
+                    }
 
-                audioStreams.add(new AudioStream(recording.getString("filename"),
-                        recording.getString("recording_url"), mediaFormat, UNKNOWN_BITRATE));
+                    audioStreams.add(new AudioStream(recording.getString("filename"),
+                            recording.getString("recording_url"), mediaFormat, UNKNOWN_BITRATE));
+                }
             }
         }
         return audioStreams;
@@ -173,26 +178,27 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
 
     @Override
     public List<VideoStream> getVideoStreams() throws ExtractionException {
-        final JsonArray recordings = data.getArray("recordings");
-        final List<VideoStream> videoStreams = new ArrayList<>();
-        for (int i = 0; i < recordings.size(); i++) {
-            final JsonObject recording = recordings.getObject(i);
-            final String mimeType = recording.getString("mime_type");
-            if (mimeType.startsWith("video")) {
-                // First we need to resolve the actual video data from CDN
+        if (videoStreams.isEmpty()) {
+            final JsonArray recordings = data.getArray("recordings");
+            for (int i = 0; i < recordings.size(); i++) {
+                final JsonObject recording = recordings.getObject(i);
+                final String mimeType = recording.getString("mime_type");
+                if (mimeType.startsWith("video")) {
+                    // First we need to resolve the actual video data from CDN
 
-                final MediaFormat mediaFormat;
-                if (mimeType.endsWith("webm")) {
-                    mediaFormat = MediaFormat.WEBM;
-                } else if (mimeType.endsWith("mp4")) {
-                    mediaFormat = MediaFormat.MPEG_4;
-                } else {
-                    mediaFormat = null;
+                    final MediaFormat mediaFormat;
+                    if (mimeType.endsWith("webm")) {
+                        mediaFormat = MediaFormat.WEBM;
+                    } else if (mimeType.endsWith("mp4")) {
+                        mediaFormat = MediaFormat.MPEG_4;
+                    } else {
+                        mediaFormat = null;
+                    }
+
+                    videoStreams.add(new VideoStream(recording.getString("filename"),
+                            recording.getString("recording_url"), mediaFormat,
+                            recording.getInt("height") + "p", false));
                 }
-
-                videoStreams.add(new VideoStream(recording.getString("filename"),
-                        recording.getString("recording_url"), mediaFormat,
-                        recording.getInt("height") + "p", false));
             }
         }
         return videoStreams;
@@ -260,7 +266,7 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getHost() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
@@ -272,13 +278,13 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getCategory() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getLicence() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Override
@@ -295,7 +301,7 @@ public class MediaCCCStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getSupportInfo() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull

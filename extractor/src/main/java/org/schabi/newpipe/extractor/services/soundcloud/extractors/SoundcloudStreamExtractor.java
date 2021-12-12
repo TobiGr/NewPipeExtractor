@@ -157,19 +157,19 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getSubChannelUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getSubChannelName() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getSubChannelAvatarUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
@@ -190,7 +190,7 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
         // For playing the track, it is only necessary to have a streamable track.
         // If this is not the case, this track might not be published yet.
         // If audio streams were calculated, return the calculated result
-        if (!track.getBoolean("streamable") || !isAvailable || !isNullOrEmpty(audioStreams)) {
+        if (!track.getBoolean("streamable") || !isAvailable || !audioStreams.isEmpty()) {
             return audioStreams;
         }
 
@@ -424,7 +424,7 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getHost() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Override
@@ -479,7 +479,7 @@ public class SoundcloudStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getSupportInfo() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull

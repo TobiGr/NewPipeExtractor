@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.schabi.newpipe.extractor.services.bandcamp.extractors.BandcampExtractorHelper.getImageUrl;
-import static org.schabi.newpipe.extractor.utils.Utils.isNullOrEmpty;
+import static org.schabi.newpipe.extractor.utils.Utils.*;
 
 public class BandcampStreamExtractor extends StreamExtractor {
     private JsonObject albumJson;
@@ -85,13 +85,13 @@ public class BandcampStreamExtractor extends StreamExtractor {
     public String getUploaderUrl() throws ParsingException {
         final String[] parts = getUrl().split("/");
         // https: (/) (/) * .bandcamp.com (/) and leave out the rest
-        return "https://" + parts[2] + "/";
+        return HTTPS + parts[2] + "/";
     }
 
     @Nonnull
     @Override
     public String getUrl() throws ParsingException {
-        return albumJson.getString("url").replace("http://", "https://");
+        return albumJson.getString("url").replace(HTTP, HTTPS);
     }
 
     @Nonnull
@@ -120,7 +120,9 @@ public class BandcampStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getThumbnailUrl() throws ParsingException {
-        if (albumJson.isNull("art_id")) return "";
+        if (albumJson.isNull("art_id")) {
+            return EMPTY_STRING;
+        }
         else return getImageUrl(albumJson.getLong("art_id"), true);
     }
 
@@ -130,26 +132,26 @@ public class BandcampStreamExtractor extends StreamExtractor {
         try {
             return document.getElementsByClass("band-photo").first().attr("src");
         } catch (final NullPointerException e) {
-            return "";
+            return EMPTY_STRING;
         }
     }
 
     @Nonnull
     @Override
     public String getSubChannelUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getSubChannelName() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getSubChannelAvatarUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
@@ -157,7 +159,7 @@ public class BandcampStreamExtractor extends StreamExtractor {
     public Description getDescription() {
         final String s = Utils.nonEmptyAndNullJoin(
                 "\n\n",
-                new String[]{
+                new String[] {
                         current.getString("about"),
                         current.getString("lyrics"),
                         current.getString("credits")
@@ -199,18 +201,18 @@ public class BandcampStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getDashMpdUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getHlsUrl() {
-        return "";
+        return EMPTY_STRING;
     }
 
     @Override
     public List<AudioStream> getAudioStreams() {
-        if (isNullOrEmpty(audioStreams)) {
+        if (audioStreams.isEmpty()) {
             audioStreams.add(new AudioStream("mp3-128", albumJson.getArray("trackinfo")
                     .getObject(0).getObject("file").getString("mp3-128"), MediaFormat.MP3, 128));
         }
@@ -235,7 +237,7 @@ public class BandcampStreamExtractor extends StreamExtractor {
 
     @Nonnull
     @Override
-    public List<SubtitlesStream> getSubtitles(MediaFormat format) {
+    public List<SubtitlesStream> getSubtitles(final MediaFormat format) {
         return Collections.emptyList();
     }
 
@@ -246,12 +248,11 @@ public class BandcampStreamExtractor extends StreamExtractor {
 
     @Override
     public PlaylistInfoItemsCollector getRelatedItems() {
+        final PlaylistInfoItemsCollector collector = new PlaylistInfoItemsCollector(
+                getServiceId());
+        final Elements recommendedAlbums = document.getElementsByClass("recommended-album");
 
-        PlaylistInfoItemsCollector collector = new PlaylistInfoItemsCollector(getServiceId());
-
-        Elements recommendedAlbums = document.getElementsByClass("recommended-album");
-
-        for (Element album : recommendedAlbums) {
+        for (final Element album : recommendedAlbums) {
             collector.commit(new BandcampRelatedPlaylistInfoItemExtractor(album));
         }
 
@@ -287,8 +288,7 @@ public class BandcampStreamExtractor extends StreamExtractor {
     @Nonnull
     @Override
     public String getLicence() {
-
-        int license = current.getInt("license_type");
+        final int license = current.getInt("license_type");
 
         /* Tests resulted in this mapping of ints to licence: https://cloud.disroot.org/s/ZTWBxbQ9fKRmRWJ/preview
          * (screenshot from a Bandcamp artist's account)
