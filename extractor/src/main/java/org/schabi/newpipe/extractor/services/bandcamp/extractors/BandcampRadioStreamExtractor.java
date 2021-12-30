@@ -27,10 +27,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.schabi.newpipe.extractor.services.bandcamp.extractors.BandcampExtractorHelper.*;
+import static org.schabi.newpipe.extractor.utils.Utils.EMPTY_STRING;
 
 public class BandcampRadioStreamExtractor extends BandcampStreamExtractor {
 
     private JsonObject showInfo;
+    private List<AudioStream> audioStreams = null;
 
     public BandcampRadioStreamExtractor(final StreamingService service, final LinkHandler linkHandler) {
         super(service, linkHandler);
@@ -110,19 +112,21 @@ public class BandcampRadioStreamExtractor extends BandcampStreamExtractor {
 
     @Override
     public List<AudioStream> getAudioStreams() {
-        final ArrayList<AudioStream> list = new ArrayList<>();
-        final JsonObject streams = showInfo.getObject("audio_stream");
+        if (audioStreams == null) {
+            audioStreams = new ArrayList<>();
+            final JsonObject streams = showInfo.getObject("audio_stream");
 
-        if (streams.has("opus-lo")) {
-            list.add(new AudioStream("opus-lo", streams.getString("opus-lo"), MediaFormat.OPUS,
-                    100));
-        }
-        if (streams.has("mp3-128")) {
-            list.add(new AudioStream("mp3-128", streams.getString("mp3-128"), MediaFormat.MP3,
-                    128));
+            if (streams.has("opus-lo")) {
+                audioStreams.add(new AudioStream("opus-lo", streams.getString("opus-lo"),
+                        MediaFormat.OPUS, 100));
+            }
+            if (streams.has("mp3-128")) {
+                audioStreams.add(new AudioStream("mp3-128", streams.getString("mp3-128"),
+                        MediaFormat.MP3, 128));
+            }
         }
 
-        return list;
+        return audioStreams;
     }
 
     @Nonnull
@@ -145,18 +149,21 @@ public class BandcampRadioStreamExtractor extends BandcampStreamExtractor {
     @Nonnull
     @Override
     public String getLicence() {
-        return "";
+        // Contrary to other Bandcamp streams, radio streams don't have a licence
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public String getCategory() {
-        return "";
+        // Contrary to other Bandcamp streams, radio streams don't have categories
+        return EMPTY_STRING;
     }
 
     @Nonnull
     @Override
     public List<String> getTags() {
+        // Contrary to other Bandcamp streams, radio streams don't have tags
         return Collections.emptyList();
     }
 

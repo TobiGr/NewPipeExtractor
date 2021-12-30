@@ -9,7 +9,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.schabi.newpipe.extractor.MediaFormat;
-import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
@@ -27,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import static org.schabi.newpipe.extractor.services.bandcamp.extractors.BandcampExtractorHelper.getImageUrl;
 import static org.schabi.newpipe.extractor.utils.Utils.*;
@@ -37,7 +35,7 @@ public class BandcampStreamExtractor extends StreamExtractor {
     private JsonObject current;
     private Document document;
 
-    private final List<AudioStream> audioStreams = new ArrayList<>();
+    private List<AudioStream> audioStreams = null;
 
     public BandcampStreamExtractor(final StreamingService service, final LinkHandler linkHandler) {
         super(service, linkHandler);
@@ -100,11 +98,6 @@ public class BandcampStreamExtractor extends StreamExtractor {
         return albumJson.getString("artist");
     }
 
-    @Override
-    public boolean isUploaderVerified() throws ParsingException {
-        return false;
-    }
-
     @Nullable
     @Override
     public String getTextualUploadDate() {
@@ -138,24 +131,6 @@ public class BandcampStreamExtractor extends StreamExtractor {
 
     @Nonnull
     @Override
-    public String getSubChannelUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public String getSubChannelName() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public String getSubChannelAvatarUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
     public Description getDescription() {
         final String s = Utils.nonEmptyAndNullJoin(
                 "\n\n",
@@ -169,50 +144,9 @@ public class BandcampStreamExtractor extends StreamExtractor {
     }
 
     @Override
-    public int getAgeLimit() {
-        return NO_AGE_LIMIT;
-    }
-
-    @Override
-    public long getLength() {
-        return 0;
-    }
-
-    @Override
-    public long getTimeStamp() {
-        return 0;
-    }
-
-    @Override
-    public long getViewCount() {
-        return -1;
-    }
-
-    @Override
-    public long getLikeCount() {
-        return -1;
-    }
-
-    @Override
-    public long getDislikeCount() {
-        return -1;
-    }
-
-    @Nonnull
-    @Override
-    public String getDashMpdUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public String getHlsUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Override
     public List<AudioStream> getAudioStreams() {
-        if (audioStreams.isEmpty()) {
+        if (audioStreams == null) {
+            audioStreams = new ArrayList<>();
             audioStreams.add(new AudioStream("mp3-128", albumJson.getArray("trackinfo")
                     .getObject(0).getObject("file").getString("mp3-128"), MediaFormat.MP3, 128));
         }
@@ -226,18 +160,6 @@ public class BandcampStreamExtractor extends StreamExtractor {
 
     @Override
     public List<VideoStream> getVideoOnlyStreams() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public List<SubtitlesStream> getSubtitlesDefault() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public List<SubtitlesStream> getSubtitles(final MediaFormat format) {
         return Collections.emptyList();
     }
 
@@ -257,23 +179,6 @@ public class BandcampStreamExtractor extends StreamExtractor {
         }
 
         return collector;
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return null;
-    }
-
-    @Nonnull
-    @Override
-    public String getHost() {
-        return "";
-    }
-
-    @Nonnull
-    @Override
-    public Privacy getPrivacy() {
-        return Privacy.PUBLIC;
     }
 
     @Nonnull
@@ -314,12 +219,6 @@ public class BandcampStreamExtractor extends StreamExtractor {
         }
     }
 
-    @Nullable
-    @Override
-    public Locale getLanguageInfo() {
-        return null;
-    }
-
     @Nonnull
     @Override
     public List<String> getTags() {
@@ -332,23 +231,5 @@ public class BandcampStreamExtractor extends StreamExtractor {
         }
 
         return tags;
-    }
-
-    @Nonnull
-    @Override
-    public String getSupportInfo() {
-        return "";
-    }
-
-    @Nonnull
-    @Override
-    public List<StreamSegment> getStreamSegments() throws ParsingException {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public List<MetaInfo> getMetaInfo() throws ParsingException {
-        return Collections.emptyList();
     }
 }

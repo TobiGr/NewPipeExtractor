@@ -5,7 +5,6 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 import org.schabi.newpipe.extractor.MediaFormat;
-import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
@@ -49,9 +48,9 @@ public class PeertubeStreamExtractor extends StreamExtractor {
     private final String baseUrl;
     private JsonObject json;
 
-    private final List<SubtitlesStream> subtitles = new ArrayList<>();
-    private final List<AudioStream> audioStreams = new ArrayList<>();
-    private final List<VideoStream> videoStreams = new ArrayList<>();
+    private List<SubtitlesStream> subtitles = null;
+    private List<AudioStream> audioStreams = null;
+    private List<VideoStream> videoStreams = null;
     private String hlsUrl = null;
 
     public PeertubeStreamExtractor(final StreamingService service, final LinkHandler linkHandler)
@@ -165,11 +164,6 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         return JsonUtils.getString(json, "account.displayName");
     }
 
-    @Override
-    public boolean isUploaderVerified() throws ParsingException {
-        return false;
-    }
-
     @Nonnull
     @Override
     public String getUploaderAvatarUrl() {
@@ -208,12 +202,6 @@ public class PeertubeStreamExtractor extends StreamExtractor {
 
     @Nonnull
     @Override
-    public String getDashMpdUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
     public String getHlsUrl() {
         assertPageFetched();
 
@@ -239,7 +227,7 @@ public class PeertubeStreamExtractor extends StreamExtractor {
         That's why the extraction of audio streams is only run when there are video streams
         extracted and when the content is not a livestream.
          */
-        if (audioStreams.isEmpty() && videoStreams.isEmpty()
+        if (audioStreams == null && videoStreams == null
                 && getStreamType() == StreamType.VIDEO_STREAM) {
             getStreams();
         }
@@ -250,7 +238,7 @@ public class PeertubeStreamExtractor extends StreamExtractor {
     public List<VideoStream> getVideoStreams() throws ExtractionException {
         assertPageFetched();
 
-        if (videoStreams.isEmpty()) {
+        if (videoStreams == null) {
             if (getStreamType() == StreamType.VIDEO_STREAM) {
                 getStreams();
             } else {
@@ -329,18 +317,6 @@ public class PeertubeStreamExtractor extends StreamExtractor {
     }
 
     @Nonnull
-    @Override
-    public List<StreamSegment> getStreamSegments() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public List<MetaInfo> getMetaInfo() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
     private String getRelatedItemsUrl(@Nonnull final List<String> tags)
             throws UnsupportedEncodingException {
         final String url = baseUrl + PeertubeSearchQueryHandlerFactory.SEARCH_ENDPOINT;
@@ -393,11 +369,6 @@ public class PeertubeStreamExtractor extends StreamExtractor {
     }
 
     @Override
-    public String getErrorMessage() {
-        return null;
-    }
-
-    @Override
     public void onFetchPage(@Nonnull final Downloader downloader)
             throws IOException, ExtractionException {
         final Response response = downloader.get(baseUrl
@@ -424,7 +395,8 @@ public class PeertubeStreamExtractor extends StreamExtractor {
     }
 
     private void loadSubtitles() {
-        if (isNullOrEmpty(subtitles)) {
+        if (subtitles == null) {
+            subtitles = new ArrayList<>();
             try {
                 final Response response = getDownloader().get(baseUrl
                         + PeertubeStreamLinkHandlerFactory.VIDEO_API_ENDPOINT
@@ -451,6 +423,7 @@ public class PeertubeStreamExtractor extends StreamExtractor {
 
     private void extractLiveVideoStreams() throws ParsingException {
         try {
+            videoStreams = new ArrayList<>();
             final JsonArray streamingPlaylists = json.getArray(STREAMING_PLAYLISTS);
             for (final Object s : streamingPlaylists) {
                 if (!(s instanceof JsonObject)) {
@@ -473,6 +446,8 @@ public class PeertubeStreamExtractor extends StreamExtractor {
     }
 
     private void getStreams() throws ParsingException {
+        audioStreams = new ArrayList<>();
+        videoStreams = new ArrayList<>();
         // Progressive streams
         getStreamsFromArray(json.getArray(FILES), EMPTY_STRING);
 

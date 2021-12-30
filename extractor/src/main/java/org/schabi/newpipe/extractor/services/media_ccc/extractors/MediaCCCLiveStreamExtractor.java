@@ -3,33 +3,35 @@ package org.schabi.newpipe.extractor.services.media_ccc.extractors;
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import org.schabi.newpipe.extractor.MediaFormat;
-import org.schabi.newpipe.extractor.MetaInfo;
 import org.schabi.newpipe.extractor.StreamingService;
 import org.schabi.newpipe.extractor.downloader.Downloader;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
 import org.schabi.newpipe.extractor.exceptions.ParsingException;
 import org.schabi.newpipe.extractor.linkhandler.LinkHandler;
-import org.schabi.newpipe.extractor.localization.DateWrapper;
 import org.schabi.newpipe.extractor.stream.*;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import static org.schabi.newpipe.extractor.stream.AudioStream.UNKNOWN_BITRATE;
 import static org.schabi.newpipe.extractor.utils.Utils.EMPTY_STRING;
 
 public class MediaCCCLiveStreamExtractor extends StreamExtractor {
+    private static final String STREAMS = "streams";
+    private static final String TYPE = "type";
+    private static final String URLS = "urls";
+    private static final String VIDEO = "video";
+    private static final String AUDIO = "audio";
+
     private JsonObject conference = null;
     private String group = "";
     private JsonObject room = null;
 
-    private final List<AudioStream> audioStreams = new ArrayList<>();
-    private final List<VideoStream> videoStreams = new ArrayList<>();
+    private List<AudioStream> audioStreams = null;
+    private List<VideoStream> videoStreams = null;
     private String firstDashUrlFound = null;
     private String firstHlsUrlFound = null;
 
@@ -71,18 +73,6 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
         return room.getString("display");
     }
 
-    @Nullable
-    @Override
-    public String getTextualUploadDate() throws ParsingException {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public DateWrapper getUploadDate() throws ParsingException {
-        return null;
-    }
-
     @Nonnull
     @Override
     public String getThumbnailUrl() throws ParsingException {
@@ -94,36 +84,6 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
     public Description getDescription() throws ParsingException {
         return new Description(conference.getString("description") + " - " + group,
                 Description.PLAIN_TEXT);
-    }
-
-    @Override
-    public int getAgeLimit() {
-        return 0;
-    }
-
-    @Override
-    public long getLength() {
-        return 0;
-    }
-
-    @Override
-    public long getTimeStamp() throws ParsingException {
-        return 0;
-    }
-
-    @Override
-    public long getViewCount() {
-        return -1;
-    }
-
-    @Override
-    public long getLikeCount() {
-        return -1;
-    }
-
-    @Override
-    public long getDislikeCount() {
-        return -1;
     }
 
     @Nonnull
@@ -138,35 +98,6 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
         return conference.getString("conference");
     }
 
-    @Override
-    public boolean isUploaderVerified() throws ParsingException {
-        return false;
-    }
-
-    @Nonnull
-    @Override
-    public String getUploaderAvatarUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public String getSubChannelUrl() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public String getSubChannelName() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public String getSubChannelAvatarUrl() {
-        return EMPTY_STRING;
-    }
-
     /**
      * Get the URL of the first DASH stream found.
      * <p>
@@ -179,12 +110,12 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
     @Override
     public String getDashMpdUrl() throws ParsingException {
         if (firstDashUrlFound == null) {
-            for (int s = 0; s < room.getArray("streams").size(); s++) {
-                final JsonObject stream = room.getArray("streams").getObject(s);
-                final JsonObject urls = stream.getObject("urls");
-                if (urls.has("dash")) {
-                    firstDashUrlFound = urls.getObject("dash").getString("url", EMPTY_STRING);
-                    return firstDashUrlFound;
+            for (int s = 0; s < room.getArray(STREAMS).size(); s++) {
+                final JsonObject stream = room.getArray(STREAMS).getObject(s);
+                if (stream.getString(TYPE).equals(VIDEO)
+                        && stream.getObject(URLS).has("dash")) {
+                    firstDashUrlFound = stream.getObject(URLS).getObject("dash")
+                            .getString("url");
                 }
             }
             firstDashUrlFound = EMPTY_STRING;
@@ -204,12 +135,11 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
     @Override
     public String getHlsUrl() {
         if (firstHlsUrlFound == null) {
-            for (int s = 0; s < room.getArray("streams").size(); s++) {
-                final JsonObject stream = room.getArray("streams").getObject(s);
-                final JsonObject urls = stream.getObject("urls");
-                if (urls.has("hls")) {
-                    firstHlsUrlFound = urls.getObject("hls").getString("url", EMPTY_STRING);
-                    return firstHlsUrlFound;
+            for (int s = 0; s < room.getArray(STREAMS).size(); s++) {
+                final JsonObject stream = room.getArray(STREAMS).getObject(s);
+                if (stream.getString(TYPE).equals(VIDEO)
+                        && stream.getObject(URLS).has("hls")) {
+                    firstHlsUrlFound = stream.getObject(URLS).getObject("hls").getString("url");
                 }
             }
             firstHlsUrlFound = EMPTY_STRING;
@@ -219,12 +149,13 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
 
     @Override
     public List<AudioStream> getAudioStreams() throws IOException, ExtractionException {
-        if (audioStreams.isEmpty()) {
-            for (int s = 0; s < room.getArray("streams").size(); s++) {
-                final JsonObject stream = room.getArray("streams").getObject(s);
-                if (stream.getString("type").equals("audio")) {
-                    for (final String type : stream.getObject("urls").keySet()) {
-                        final JsonObject urlObject = stream.getObject("urls").getObject(type);
+        if (audioStreams == null) {
+            audioStreams = new ArrayList<>();
+            for (int s = 0; s < room.getArray(STREAMS).size(); s++) {
+                final JsonObject stream = room.getArray(STREAMS).getObject(s);
+                if (stream.getString(TYPE).equals(AUDIO)) {
+                    for (final String type : stream.getObject(URLS).keySet()) {
+                        final JsonObject urlObject = stream.getObject(URLS).getObject(type);
                         // The DASH manifest will be extracted with getDashMpdUrl
                         if (!type.equals("dash")) {
                             if (type.equals("hls")) {
@@ -254,14 +185,15 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
 
     @Override
     public List<VideoStream> getVideoStreams() throws IOException, ExtractionException {
-        if (videoStreams.isEmpty()) {
-            for (int s = 0; s < room.getArray("streams").size(); s++) {
-                final JsonObject stream = room.getArray("streams").getObject(s);
-                if (stream.getString("type").equals("video")) {
+        if (videoStreams == null) {
+            videoStreams = new ArrayList<>();
+            for (int s = 0; s < room.getArray(STREAMS).size(); s++) {
+                final JsonObject stream = room.getArray(STREAMS).getObject(s);
+                if (stream.getString(TYPE).equals(VIDEO)) {
                     final String resolution = stream.getArray("videoSize").getInt(0) + "x"
                             + stream.getArray("videoSize").getInt(1);
-                    for (final String type : stream.getObject("urls").keySet()) {
-                        final JsonObject urlObject = stream.getObject("urls").getObject(type);
+                    for (final String type : stream.getObject(URLS).keySet()) {
+                        final JsonObject urlObject = stream.getObject(URLS).getObject(type);
                         // The DASH manifest will be extracted with getDashMpdUrl
                         if (!type.equals("dash")) {
                             if (type.equals("hls")) {
@@ -299,85 +231,14 @@ public class MediaCCCLiveStreamExtractor extends StreamExtractor {
         return Collections.emptyList();
     }
 
-    @Nonnull
-    @Override
-    public List<SubtitlesStream> getSubtitlesDefault() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public List<SubtitlesStream> getSubtitles(MediaFormat format) {
-        return Collections.emptyList();
-    }
-
     @Override
     public StreamType getStreamType() throws ParsingException {
         return StreamType.LIVE_STREAM;
-    }
-
-    @Nullable
-    @Override
-    public StreamInfoItemsCollector getRelatedItems() {
-        return null;
-    }
-
-    @Override
-    public String getErrorMessage() {
-        return null;
-    }
-
-    @Nonnull
-    @Override
-    public String getHost() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public Privacy getPrivacy() {
-        return Privacy.PUBLIC;
     }
 
     @Nonnull
     @Override
     public String getCategory() {
         return group;
-    }
-
-    @Nonnull
-    @Override
-    public String getLicence() {
-        return EMPTY_STRING;
-    }
-
-    @Nullable
-    @Override
-    public Locale getLanguageInfo() {
-        return null;
-    }
-
-    @Nonnull
-    @Override
-    public List<String> getTags() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public String getSupportInfo() {
-        return EMPTY_STRING;
-    }
-
-    @Nonnull
-    @Override
-    public List<StreamSegment> getStreamSegments() {
-        return Collections.emptyList();
-    }
-
-    @Nonnull
-    @Override
-    public List<MetaInfo> getMetaInfo() {
-        return Collections.emptyList();
     }
 }
