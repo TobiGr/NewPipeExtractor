@@ -5,7 +5,6 @@ import org.schabi.newpipe.extractor.NewPipe;
 import org.schabi.newpipe.extractor.downloader.Downloader;
 import org.schabi.newpipe.extractor.downloader.Response;
 import org.schabi.newpipe.extractor.exceptions.ExtractionException;
-import org.schabi.newpipe.extractor.utils.Parser;
 import org.schabi.newpipe.extractor.utils.Utils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
@@ -24,11 +23,9 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static org.schabi.newpipe.extractor.services.youtube.YoutubeParsingHelper.*;
-import static org.schabi.newpipe.extractor.utils.Utils.EMPTY_STRING;
-import static org.schabi.newpipe.extractor.utils.Utils.isNullOrEmpty;
+import static org.schabi.newpipe.extractor.utils.Utils.*;
 
 /**
  * Class to generate DASH manifests from YouTube OTF, progressive and ended/post-live-DVR streams.
@@ -38,13 +35,6 @@ import static org.schabi.newpipe.extractor.utils.Utils.isNullOrEmpty;
  * </p>
  */
 public final class YoutubeDashManifestCreator {
-
-    /**
-     * A {@link Pattern} to find the {@code Segment-Durations-Ms:} string and its value in the
-     * initialization sequence of an OTF stream.
-     */
-    private static final Pattern SEGMENT_DURATION_MS_PATTERN = Pattern.compile(
-            "Segment-Durations-Ms: ((?:\\d+,\\d+,)?(?:\\d+\\(r=\\d+\\)(,\\d+)+,)+)");
 
     /**
      * URL parameter of the first sequence for live, post-live-DVR and OTF streams.
@@ -269,14 +259,19 @@ public final class YoutubeDashManifestCreator {
                             + responseCode);
         }
         responseBody = response.responseBody();
-
         final String[] segmentDuration;
 
         try {
-            final String segmentDurationMs = Parser.matchGroup1(SEGMENT_DURATION_MS_PATTERN,
-                    responseBody);
-            segmentDuration = segmentDurationMs.split(",");
-        } catch (final Parser.RegexException e) {
+            final String[] segmentDurationMs = responseBody
+                    .split("Segment-Durations-Ms: ")[1] // get the lines with the durations and the following
+                    .split("\n")[0] // remove the other lines
+                    .split(","); // get all durations and repetitions which are separated by a ","
+            if (removeNonDigitCharacters(segmentDurationMs[segmentDurationMs.length - 1]).isEmpty()) {
+                segmentDuration = Arrays.copyOf(segmentDurationMs, segmentDurationMs.length - 1);
+            } else {
+                segmentDuration = segmentDurationMs;
+            }
+        } catch (final Exception e) {
             throw new YoutubeDashManifestCreationException(
                     "Unable to generate the DASH manifest: could not get the duration of segments", e);
         }
@@ -723,7 +718,7 @@ public final class YoutubeDashManifestCreator {
 
     /**
      * Collect all segments from an OTF stream, by parsing the string array which contains all the
-     * sequences extracted with the regular expression {@link #SEGMENT_DURATION_MS_PATTERN}.
+     * sequences.
      *
      * @param segmentDuration the string array which contains all the sequences extracted with the
      *                        regular expression
