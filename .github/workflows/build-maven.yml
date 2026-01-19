@@ -1,0 +1,22 @@
+name: Generate unsigned dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: 'master'
+
+      - name: Build artifacts
+        run: "./gradlew publishReleasePublicationToLocalRepository"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: build
+          path: extractor/build/maven
