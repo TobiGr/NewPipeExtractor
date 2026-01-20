@@ -7,6 +7,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Allow only repo maintainers or admins to run
+        uses: actions/github-script@v6
+        with:
+          script: |
+            if (context.eventName === 'workflow_dispatch') {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                username: context.actor
+              });
+              const perm = data.permission;
+              if (perm !== 'admin' && perm !== 'maintain') {
+                throw new Error(`Permission denied: '${context.actor}' has '${perm}' permission. Only 'maintain' or 'admin' may run this workflow.`);
+              }
+            }
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -14,6 +30,31 @@ jobs:
 
       - name: Build artifacts
         run: "./gradlew publishReleasePublicationToLocalRepository"
+
+      - name: Import GPG private key
+        if: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY != '' }}
+        env:
+          MAVEN_SIGNING_PRIVATE_KEY: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.gnupg
+          chmod 700 ~/.gnupg
+          echo "MAVEN_SIGNING_PRIVATE_KEY" | gpg --batch --import -
+          gpg --list-secret-keys --keyid-format LONG
+
+      - name: Sign Maven artifacts
+        if: ${{ secrets.MAVEN_SIGNING_PRIVATE_KEY != '' }}
+        env:
+          MAVEN_SIGNING_PASSPHRASE: ${{ secrets.MAVEN_SIGNING_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          # allow loopback pinentry for passphrase-based signing
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg.conf || true
+          find extractor/build/maven -type f \( -name "*.jar" -o -name "*.pom" -o -name "*.aar" -o -name "*.zip" \) -print0 \
+            | while IFS= read -r -d '' f; do
+                echo "Signing $f"
+                gpg --batch --yes --pinentry-mode loopback --passphrase "${MAVEN_SIGNING_PASSPHRASE:-}" --armor --detach-sign "$f"
+              done
+
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
