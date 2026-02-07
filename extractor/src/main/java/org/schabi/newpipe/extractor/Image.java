@@ -12,7 +12,7 @@ import java.util.Objects;
  * </p>
  *
  * <p>
- * Depending of the services, the height, the width or both properties may be not known.
+ * Depending on the services, the height, the width or both properties may be not known.
  * Implementations <b>must use</b> the relevant unknown constants in this case
  * ({@link #HEIGHT_UNKNOWN} and {@link #WIDTH_UNKNOWN}), to ensure properly the lack of knowledge
  * of one or both of these properties to extractor clients.
