@@ -973,8 +973,7 @@ public final class YoutubeParsingHelper {
                 .map(thumbnail -> {
                     final int height = thumbnail.getInt("height", Image.HEIGHT_UNKNOWN);
                     return new Image(fixThumbnailUrl(thumbnail.getString("url")),
-                            height,
-                            thumbnail.getInt("width", Image.WIDTH_UNKNOWN),
+                            thumbnail.getInt("width", Image.WIDTH_UNKNOWN), height,
                             ResolutionLevel.fromHeight(height));
                 })
                 .collect(Collectors.toUnmodifiableList());

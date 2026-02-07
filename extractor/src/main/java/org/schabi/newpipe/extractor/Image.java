@@ -37,8 +37,8 @@ public final class Image implements Serializable {
 
     @Nonnull
     private final String url;
-    private final int height;
     private final int width;
+    private final int height;
     @Nonnull
     private final ResolutionLevel estimatedResolutionLevel;
 
@@ -46,15 +46,14 @@ public final class Image implements Serializable {
      * Construct an {@link Image} instance.
      *
      * @param url                      the URL to the image, which should be not null or empty
-     * @param height                   the image's height
      * @param width                    the image's width
+     * @param height                   the image's height
      * @param estimatedResolutionLevel the image's estimated resolution level, which must not be
      *                                 null
      * @throws NullPointerException if {@code estimatedResolutionLevel} is null
      */
     public Image(@Nonnull final String url,
-                 final int height,
-                 final int width,
+                 final int width, final int height,
                  @Nonnull final ResolutionLevel estimatedResolutionLevel)
             throws NullPointerException {
         this.url = url;
@@ -75,19 +74,6 @@ public final class Image implements Serializable {
     }
 
     /**
-     * Get the height of this {@link Image}.
-     *
-     * <p>
-     * If it is unknown, {@link #HEIGHT_UNKNOWN} is returned instead.
-     * </p>
-     *
-     * @return the {@link Image}'s height or {@link #HEIGHT_UNKNOWN}
-     */
-    public int getHeight() {
-        return height;
-    }
-
-    /**
      * Get the width of this {@link Image}.
      *
      * <p>
@@ -98,6 +84,19 @@ public final class Image implements Serializable {
      */
     public int getWidth() {
         return width;
+    }
+
+    /**
+     * Get the height of this {@link Image}.
+     *
+     * <p>
+     * If it is unknown, {@link #HEIGHT_UNKNOWN} is returned instead.
+     * </p>
+     *
+     * @return the {@link Image}'s height or {@link #HEIGHT_UNKNOWN}
+     */
+    public int getHeight() {
+        return height;
     }
 
     /**

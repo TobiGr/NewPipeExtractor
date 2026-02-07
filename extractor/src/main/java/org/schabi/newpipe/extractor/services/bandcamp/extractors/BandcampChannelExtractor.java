@@ -69,7 +69,7 @@ public class BandcampChannelExtractor extends ChannelExtractor {
                     .map(element -> element.attr("src"))
                     .filter(url -> !url.isEmpty())
                     .map(url -> new Image(
-                            replaceHttpWithHttps(url), HEIGHT_UNKNOWN, WIDTH_UNKNOWN,
+                            replaceHttpWithHttps(url), WIDTH_UNKNOWN, HEIGHT_UNKNOWN,
                             ResolutionLevel.UNKNOWN))
                     .collect(Collectors.toUnmodifiableList());
 

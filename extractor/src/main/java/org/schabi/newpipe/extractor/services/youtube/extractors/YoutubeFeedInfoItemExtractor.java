@@ -125,6 +125,6 @@ public class YoutubeFeedInfoItemExtractor implements StreamInfoItemExtractor {
         }
 
         return List.of(
-                new Image(newFeedThumbnailUrl, height, width, ResolutionLevel.fromHeight(height)));
+                new Image(newFeedThumbnailUrl, width, height, ResolutionLevel.fromHeight(height)));
     }
 }

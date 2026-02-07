@@ -285,7 +285,7 @@ public class YoutubeMixPlaylistExtractor extends PlaylistExtractor {
         final String baseUrl = "https://i.ytimg.com/vi/" + videoId + "/";
         return IMAGE_URL_SUFFIXES_AND_RESOLUTIONS.stream()
                 .map(imageSuffix -> new Image(baseUrl + imageSuffix.getSuffix(),
-                        imageSuffix.getHeight(), imageSuffix.getWidth(),
+                        imageSuffix.getWidth(), imageSuffix.getHeight(),
                         imageSuffix.getResolutionLevel()))
                 .collect(Collectors.toUnmodifiableList());
     }

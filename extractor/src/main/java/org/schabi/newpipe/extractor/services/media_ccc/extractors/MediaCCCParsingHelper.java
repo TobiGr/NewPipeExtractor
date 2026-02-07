@@ -88,7 +88,7 @@ public final class MediaCCCParsingHelper {
             return List.of();
         }
 
-        return List.of(new Image(logoImageUrl, HEIGHT_UNKNOWN, WIDTH_UNKNOWN,
+        return List.of(new Image(logoImageUrl, WIDTH_UNKNOWN, HEIGHT_UNKNOWN,
                 ResolutionLevel.UNKNOWN));
     }
 
@@ -151,13 +151,13 @@ public final class MediaCCCParsingHelper {
 
         final String thumbUrl = streamOrLivestreamItem.getString(thumbUrlKey);
         if (!isNullOrEmpty(thumbUrl)) {
-            imageList.add(new Image(thumbUrl, HEIGHT_UNKNOWN, WIDTH_UNKNOWN,
+            imageList.add(new Image(thumbUrl, WIDTH_UNKNOWN, HEIGHT_UNKNOWN,
                     ResolutionLevel.MEDIUM));
         }
 
         final String posterUrl = streamOrLivestreamItem.getString(posterUrlKey);
         if (!isNullOrEmpty(posterUrl)) {
-            imageList.add(new Image(posterUrl, HEIGHT_UNKNOWN, WIDTH_UNKNOWN,
+            imageList.add(new Image(posterUrl, WIDTH_UNKNOWN, HEIGHT_UNKNOWN,
                     ResolutionLevel.HIGH));
         }
 

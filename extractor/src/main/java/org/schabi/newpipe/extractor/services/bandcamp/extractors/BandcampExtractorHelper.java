@@ -296,7 +296,7 @@ public final class BandcampExtractorHelper {
     private static List<Image> getImagesFromImageBaseUrl(@Nonnull final String baseUrl) {
         return IMAGE_URL_SUFFIXES_AND_RESOLUTIONS.stream()
                 .map(imageSuffix -> new Image(baseUrl + imageSuffix.getSuffix(),
-                        imageSuffix.getHeight(), imageSuffix.getWidth(),
+                        imageSuffix.getWidth(), imageSuffix.getHeight(),
                         imageSuffix.getResolutionLevel()))
                 .collect(Collectors.toUnmodifiableList());
     }

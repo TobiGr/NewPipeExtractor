@@ -214,13 +214,13 @@ public final class PeertubeParsingHelper {
 
         final String thumbnailPath = playlistOrVideoItemObject.getString("thumbnailPath");
         if (!isNullOrEmpty(thumbnailPath)) {
-            imageList.add(new Image(baseUrl + thumbnailPath, HEIGHT_UNKNOWN, WIDTH_UNKNOWN,
+            imageList.add(new Image(baseUrl + thumbnailPath, WIDTH_UNKNOWN, HEIGHT_UNKNOWN,
                     ResolutionLevel.LOW));
         }
 
         final String previewPath = playlistOrVideoItemObject.getString("previewPath");
         if (!isNullOrEmpty(previewPath)) {
-            imageList.add(new Image(baseUrl + previewPath, HEIGHT_UNKNOWN, WIDTH_UNKNOWN,
+            imageList.add(new Image(baseUrl + previewPath, WIDTH_UNKNOWN, HEIGHT_UNKNOWN,
                     ResolutionLevel.MEDIUM));
         }
 
@@ -264,8 +264,8 @@ public final class PeertubeParsingHelper {
         final JsonObject image = ownerAccountOrVideoChannelObject.getObject(jsonObjectName);
         final String path = image.getString("path");
         if (!isNullOrEmpty(path)) {
-            return List.of(new Image(baseUrl + path, HEIGHT_UNKNOWN,
-                    image.getInt("width", WIDTH_UNKNOWN), ResolutionLevel.UNKNOWN));
+            return List.of(new Image(baseUrl + path, image.getInt("width", WIDTH_UNKNOWN), HEIGHT_UNKNOWN,
+                    ResolutionLevel.UNKNOWN));
         }
 
         return List.of();
@@ -297,8 +297,8 @@ public final class PeertubeParsingHelper {
                 .filter(JsonObject.class::isInstance)
                 .map(JsonObject.class::cast)
                 .filter(image -> !isNullOrEmpty(image.getString("path")))
-                .map(image -> new Image(baseUrl + image.getString("path"), HEIGHT_UNKNOWN,
-                        image.getInt("width", WIDTH_UNKNOWN), ResolutionLevel.UNKNOWN))
+                .map(image -> new Image(baseUrl + image.getString("path"), image.getInt("width", WIDTH_UNKNOWN), HEIGHT_UNKNOWN,
+                        ResolutionLevel.UNKNOWN))
                 .collect(Collectors.toUnmodifiableList());
     }
 }

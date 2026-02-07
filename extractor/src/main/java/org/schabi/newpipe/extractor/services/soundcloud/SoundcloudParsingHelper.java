@@ -490,7 +490,7 @@ public final class SoundcloudParsingHelper {
         return imageSuffixes.stream()
                 .map(imageSuffix -> new Image(
                         String.format(baseImageUrlFormat, imageSuffix.getSuffix()),
-                        imageSuffix.getHeight(), imageSuffix.getWidth(),
+                        imageSuffix.getWidth(), imageSuffix.getHeight(),
                         imageSuffix.getResolutionLevel()))
                 .collect(Collectors.toUnmodifiableList());
     }
